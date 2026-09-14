@@ -2,9 +2,9 @@
 
 Update this file at the end of every session. This is the single source of truth for "what's done" and "why we did it this way." The agent must read this before doing anything else.
 
-**Last updated:** _(update this each session)_
+**Last updated:** 2026-09-14
 **Current phase:** Phase 1 — Foundations
-**Status:** Not started
+**Status:** In Progress
 
 ---
 
@@ -14,13 +14,13 @@ Mirrors `docs/PRD.md` Section 10. Check items off as they are *fully* done
 per the Definition of Done in `AGENT.md` — not partially.
 
 ### Phase 1 — Foundations
-- [ ] Repo scaffolding (backend/, frontend/ folders)
-- [ ] Docker Compose: Postgres + Redis
-- [ ] Drizzle schema written for all tables (see PRD.md Section 5)
+- [x] Repo scaffolding (backend/, frontend/ folders)
+- [x] Docker Compose: Postgres + Redis
+- [x] Drizzle schema written for all tables (see PRD.md Section 5)
 - [ ] Drizzle migrations run successfully
-- [ ] Express app skeleton (app.js, server.js) with pino-http logging
-- [ ] Central error handler + `ApiError` class
-- [ ] Shared response envelope helper
+- [x] Express app skeleton (app.js, server.js) with pino-http logging
+- [x] Central error handler + `ApiError` class
+- [x] Shared response envelope helper
 
 ### Phase 2 — Auth end-to-end
 - [ ] Register / login / logout endpoints
@@ -86,13 +86,17 @@ per the Definition of Done in `AGENT.md` — not partially.
 
 ## Current Focus
 
-_(What's actively being worked on right now — update at start/end of each session)_
+## Current Focus
+
+Phase 1 Foundations: Repo scaffolding, schema creation, error handler and app skeleton.
+Blocked on running Drizzle migrations because Docker is not available.
 
 —
 
 ## Next Up
 
 _(What the next session should pick up first)_
+Run Drizzle migrations once Docker/Postgres is running. Then proceed to Phase 2.
 
 —
 
@@ -107,6 +111,6 @@ _(What the next session should pick up first)_
 
 ## Known Issues / Notes for Next Session
 
-_(Anything left rough, any blocker, any "come back to this")_
+Docker command not found on system. Need user to start Docker or provide a PostgreSQL database connection to complete migrations for Phase 1.
 
 —
