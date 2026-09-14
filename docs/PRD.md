@@ -1,4 +1,4 @@
-# TaskFlow — Collaborative Project & Task Management Platform
+# Project-Task-Manager — Collaborative Project & Task Management Platform
 
 ## A single, complete, production-shaped learning project
 
@@ -6,7 +6,7 @@
 
 ## 1. Why This Project
 
-Need one domain that is rich enough to naturally require *every* tech. to cover in full stack (Nodejs Express, React, PostgreSQL, Redis) with more advance features and professional coding standards. This **Jira/Linear/Trello-style team task manager** does that:
+Need one domain that is rich enough to naturally require *every* feature to cover in full stack (Nodejs Express, React, PostgreSQL, Redis) with more advance features and professional coding standards. This **Jira/Linear/Trello-style team task manager** does that:
 
 - Multiple users, multiple teams → **RBAC** is unavoidable.
 - Task lists that grow → **pagination, search, filter, sort, caching**.
@@ -22,7 +22,7 @@ It is scoped enough to finish, and every "advanced" feature has an honest reason
 
 ## 2. Core Concept
 
-**TaskFlow**: Users create **Workspaces** → each Workspace has **Projects** → each Project has **Tasks** (Kanban-style: Todo / In Progress / In Review / Done) → Tasks have **Comments**, **Attachments**, **Assignees**, **Priorities**, **Due Dates**. Workspace members have roles (Owner, Admin, Member, Viewer) that gate what they can do. Users get **real-time notifications** when assigned, mentioned, or commented on.
+**Project-Task-Manager**: Users create **Workspaces** → each Workspace has **Projects** → each Project has **Tasks** (Kanban-style: Todo / In Progress / In Review / Done) → Tasks have **Comments**, **Attachments**, **Assignees**, **Priorities**, **Due Dates**. Workspace members have roles (Owner, Admin, Member, Viewer) that gate what they can do. Users get **real-time notifications** when assigned, mentioned, or commented on.
 
 This is deliberately close to Jira/Linear/Trello because those are the products whose engineering patterns are the industry standard you're trying to learn.
 
@@ -52,7 +52,7 @@ This is deliberately close to Jira/Linear/Trello because those are the products 
 
 | Package | Exact Role |
 |---|---|
-| React + Vite + TypeScript | App shell, dev server, build |
+| React + Vite + JavaScript | App shell, dev server, build |
 | React Router v6 | Routing, protected/role-gated routes, lazy-loaded route chunks |
 | TanStack Query | Server state, caching, pagination, infinite scroll, optimistic mutations |
 | Axios | HTTP client with interceptors (auth refresh, logging, idempotency headers) |
@@ -279,7 +279,7 @@ Indexes to add deliberately (for learning): `tasks(project_id, status)`, `tasks(
 
 ### 6.13 Background Jobs
 - BullMQ queue backed by Redis. Jobs: welcome email on register, digest email of unread notifications, cleanup of expired idempotency keys / expired refresh tokens.
-- Runs as a **separate worker process** (`worker.ts`), not inside the API process — this is the real-world separation you're meant to learn.
+- Runs as a **separate worker process** (`worker.js`), not inside the API process — this is the real-world separation you're meant to learn.
 
 ### 6.14 File Uploads
 - Multer for multipart parsing, `sharp` to generate a resized avatar/thumbnail, store on disk locally for dev (swap-in-ready interface for S3 later — but implemented as a real local disk store now, not a stub).
@@ -308,38 +308,37 @@ backend/
       migrations/
     modules/
       auth/
-        auth.controller.ts
-        auth.service.ts
-        auth.repository.ts
-        auth.validators.ts
-        auth.routes.ts
+        auth.controller.js
+        auth.service.js
+        auth.repository.js
+        auth.validators.js
+        auth.routes.js
       workspaces/
       projects/
       tasks/
       comments/
       notifications/
     middlewares/
-      auth.middleware.ts
-      rbac.middleware.ts
-      rateLimit.middleware.ts
-      idempotency.middleware.ts
-      validate.middleware.ts
-      errorHandler.middleware.ts
+      auth.middleware.js
+      rbac.middleware.js
+      rateLimit.middleware.js
+      idempotency.middleware.js
+      validate.middleware.js
+      errorHandler.middleware.js
     sockets/
-      index.ts
+      index.js
       handlers/
     jobs/
-      queue.ts
+      queue.js
       workers/
     utils/
-    types/
-    app.ts              # express app assembly
-    server.ts            # http server + socket bootstrap
-    worker.ts             # separate BullMQ worker entrypoint
+    app.js              # express app assembly
+    server.js            # http server + socket bootstrap
+    worker.js             # separate BullMQ worker entrypoint
   tests/
     unit/
     integration/
-  drizzle.config.ts
+  drizzle.config.js
   .env.example
 ```
 
@@ -349,33 +348,32 @@ frontend/
   src/
     api/                 # axios instance + per-resource api functions
     app/
-      store.ts            # Redux Toolkit store
-      queryClient.ts       # TanStack Query client config
+      store.js            # Redux Toolkit store
+      queryClient.js       # TanStack Query client config
     features/
       auth/
         components/
         hooks/
-        authSlice.ts       # Redux Toolkit slice
+        authSlice.js       # Redux Toolkit slice
       workspaces/
       projects/
       tasks/
         components/
-          TaskCard.tsx
-          TaskCardSkeleton.tsx
-          KanbanBoard.tsx
+          TaskCard.jsx
+          TaskCardSkeleton.jsx
+          KanbanBoard.jsx
         hooks/
-          useTasks.ts        # TanStack Query hooks
-          useOptimisticTaskUpdate.ts
+          useTasks.js        # TanStack Query hooks
+          useOptimisticTaskUpdate.js
       notifications/
-    stores/               # Zustand stores (ui.store.ts, theme.store.ts)
+    stores/               # Zustand stores (ui.store.js, theme.store.js)
     context/               # ThemeContext, WebSocketContext
     hooks/                 # shared custom hooks (useDebounce, useThrottle, etc.)
     components/ui/         # shadcn/ui components
     routes/
-      index.tsx             # route definitions with lazy() + role guards
+      index.jsx             # route definitions with lazy() + role guards
     lib/
       zodSchemas/
-    types/
 ```
 
 ---

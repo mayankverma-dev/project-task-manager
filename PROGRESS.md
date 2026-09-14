@@ -1,8 +1,6 @@
 # PROGRESS.md — Build Status & Decision Log
 
-> Update this file at the end of every session. This is the single source of
-> truth for "what's done" and "why we did it this way." The agent must read
-> this before doing anything else.
+Update this file at the end of every session. This is the single source of truth for "what's done" and "why we did it this way." The agent must read this before doing anything else.
 
 **Last updated:** _(update this each session)_
 **Current phase:** Phase 1 — Foundations
@@ -20,7 +18,7 @@ per the Definition of Done in `AGENT.md` — not partially.
 - [ ] Docker Compose: Postgres + Redis
 - [ ] Drizzle schema written for all tables (see PRD.md Section 5)
 - [ ] Drizzle migrations run successfully
-- [ ] Express app skeleton (app.ts, server.ts) with pino-http logging
+- [ ] Express app skeleton (app.js, server.js) with pino-http logging
 - [ ] Central error handler + `ApiError` class
 - [ ] Shared response envelope helper
 

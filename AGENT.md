@@ -1,6 +1,6 @@
 # AGENT.md — Read This First, Every Session
 
-You are working on **TaskFlow**, a collaborative project/task management app.
+You are working on **Project-Task-Manager**, a collaborative project/task management app.
 This file is the entry point. Before writing any code, read in this order:
 
 1. `AGENT.md` (this file)

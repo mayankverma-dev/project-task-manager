@@ -11,15 +11,15 @@ reinvented per session. Copy the template below for every new module.
 Every domain under `src/modules/<name>/` has exactly these files:
 
 ```
-<name>.routes.ts        # wires routes to controller, applies middleware
-<name>.controller.ts     # parses req, calls service, returns via response helper
-<name>.service.ts        # business logic, calls repository + cache
-<name>.repository.ts     # Drizzle queries only, no business logic
-<name>.validators.ts      # Zod schemas for this module's inputs
+<name>.routes.js        # wires routes to controller, applies middleware
+<name>.controller.js     # parses req, calls service, returns via response helper
+<name>.service.js        # business logic, calls repository + cache
+<name>.repository.js     # Drizzle queries only, no business logic
+<name>.validators.js      # Zod schemas for this module's inputs
 ```
 
-No other file names, no variations (not `<name>Controller.ts`, not
-`<name>.handlers.ts`). If a module needs more, that means it should
+No other file names, no variations (not `<name>Controller.js`, not
+`<name>.handlers.js`). If a module needs more, that means it should
 probably be split into two modules, not given extra file types.
 
 ### Shared Helpers (write once, reuse everywhere — never re-implement)
@@ -34,11 +34,11 @@ Located in `src/utils/`:
   central error handler without a try/catch in every controller.
 - `logger` (pino instance) — imported wherever logging is needed. Never
   `console.log` in application code.
-- `cache.ts` — `getOrSetCache(key, ttl, fetchFn)` cache-aside helper, and
+- `cache.js` — `getOrSetCache(key, ttl, fetchFn)` cache-aside helper, and
   `invalidateCache(pattern)`. All Redis caching goes through these two
   functions, not ad-hoc `redis.get`/`redis.set` calls scattered around.
 
-### Middleware (applied in `<name>.routes.ts`, in this order)
+### Middleware (applied in `<name>.routes.js`, in this order)
 
 ```
 router.post('/',
@@ -59,12 +59,10 @@ router.post('/',
 |---|---|---|
 | DB tables | snake_case, plural | `workspace_members` |
 | DB columns | snake_case | `created_at` |
-| TS files | kebab-case module folder, dot-suffix file | `tasks/tasks.service.ts` |
-| TS types/interfaces | PascalCase | `TaskWithAssignee` |
-| React components | PascalCase, one per file | `TaskCard.tsx` |
-| React hooks | camelCase, `use` prefix | `useTasks.ts` |
-| Zustand stores | `<name>.store.ts` | `ui.store.ts` |
-| Redux slices | `<name>Slice.ts` | `authSlice.ts` |
+| React components | PascalCase, one per file | `TaskCard.jsx` |
+| React hooks | camelCase, `use` prefix | `useTasks.js` |
+| Zustand stores | `<name>.store.js` | `ui.store.js` |
+| Redux slices | `<name>Slice.js` | `authSlice.js` |
 | Zod schemas | colocated with the form/module, `<name>Schema` | `createTaskSchema` |
 | Branches | `phase-<n>/<short-desc>` | `phase-4/task-kanban-board` |
 
@@ -90,7 +88,7 @@ router.post('/',
   shape.
 - Every list/detail view that fetches data has a matching `<Thing>Skeleton`
   component — build the skeleton in the same PR as the real component.
-- Axios instance lives in `src/api/axiosInstance.ts` — one instance, with
+- Axios instance lives in `src/api/axiosInstance.js` — one instance, with
   the interceptors, reused by every resource's api functions. Don't create
   a second axios instance anywhere.
 
