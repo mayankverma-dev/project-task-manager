@@ -17,7 +17,7 @@ per the Definition of Done in `AGENT.md` — not partially.
 - [x] Repo scaffolding (backend/, frontend/ folders)
 - [x] Docker Compose: Postgres + Redis
 - [x] Drizzle schema written for all tables (see PRD.md Section 5)
-- [ ] Drizzle migrations run successfully
+- [x] Drizzle migrations run successfully
 - [x] Express app skeleton (app.js, server.js) with pino-http logging
 - [x] Central error handler + `ApiError` class
 - [x] Shared response envelope helper
