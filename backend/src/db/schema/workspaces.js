@@ -22,3 +22,17 @@ export const workspaceMembers = pgTable('workspace_members', {
     workspaceUserUnique: unique().on(table.workspaceId, table.userId),
   };
 });
+
+export const workspaceInvites = pgTable('workspace_invites', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  workspaceId: uuid('workspace_id').references(() => workspaces.id, { onDelete: 'cascade' }).notNull(),
+  email: varchar('email', { length: 255 }).notNull(),
+  role: roleEnum('role').notNull().default('member'),
+  token: varchar('token', { length: 255 }).notNull().unique(),
+  expiresAt: timestamp('expires_at').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => {
+  return {
+    workspaceEmailUnique: unique().on(table.workspaceId, table.email),
+  };
+});

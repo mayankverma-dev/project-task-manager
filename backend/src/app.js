@@ -7,6 +7,7 @@ import { logger } from './utils/logger.js';
 import { errorHandler } from './middlewares/errorHandler.middleware.js';
 import cookieParser from 'cookie-parser';
 import authRoutes from './modules/auth/auth.routes.js';
+import workspacesRoutes from './modules/workspaces/workspaces.routes.js';
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.get('/api/v1/health', (req, res) => {
 });
 
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/workspaces', workspacesRoutes);
 
 // Central error handler
 app.use(errorHandler);

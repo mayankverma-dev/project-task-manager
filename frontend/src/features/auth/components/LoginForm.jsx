@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { axiosInstance } from '../../../api/axiosInstance.js';
 import { setCredentials } from '../authSlice.js';
@@ -19,6 +19,8 @@ export const LoginForm = () => {
   });
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [searchParams] = useSearchParams();
+  const returnTo = searchParams.get('returnTo');
   
   const onSubmit = async (data) => {
     try {
@@ -26,7 +28,7 @@ export const LoginForm = () => {
       const { user, accessToken } = response.data.data;
       dispatch(setCredentials({ user, accessToken }));
       toast.success('Logged in successfully');
-      navigate('/');
+      navigate(returnTo || '/');
     } catch (error) {
       toast.error(error.response?.data?.error?.message || 'Login failed');
     }
@@ -63,7 +65,7 @@ export const LoginForm = () => {
         </button>
       </form>
       <p className="mt-4 text-center text-sm text-gray-600">
-        Don't have an account? <Link to="/register" className="text-blue-600 hover:underline">Sign up</Link>
+        Don't have an account? <Link to={`/register${returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : ''}`} className="text-blue-600 hover:underline">Sign up</Link>
       </p>
     </div>
   );

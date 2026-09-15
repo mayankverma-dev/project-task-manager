@@ -11,7 +11,7 @@ export const authenticate = asyncHandler(async (req, res, next) => {
   const token = authHeader.split(' ')[1];
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // { userId: ... }
+    req.user = { ...decoded, userId: decoded.id || decoded.userId };
     next();
   } catch (err) {
     throw new ApiError(401, 'UNAUTHORIZED', 'Access token expired or invalid');

@@ -3,8 +3,8 @@
 Update this file at the end of every session. This is the single source of truth for "what's done" and "why we did it this way." The agent must read this before doing anything else.
 
 **Last updated:** 2026-09-14
-**Current phase:** Phase 2 — Auth end-to-end
-**Status:** Complete
+**Current phase:** Phase 4 — Projects + Tasks core CRUD
+**Status:** In Progress
 
 ---
 
@@ -32,10 +32,10 @@ per the Definition of Done in `AGENT.md` — not partially.
 - [x] Frontend: protected routes
 
 ### Phase 3 — Workspaces + RBAC
-- [ ] Workspace CRUD + invite flow
-- [ ] `workspace_members` + role enum
-- [ ] `requireRole` middleware
-- [ ] Frontend: workspace switcher, `usePermission` hook
+- [x] Workspace CRUD + invite flow
+- [x] `workspace_members` + role enum
+- [x] `requireRole` middleware
+- [x] Frontend: workspace switcher, `usePermission` hook
 
 ### Phase 4 — Projects + Tasks core CRUD
 - [ ] Projects CRUD
@@ -88,14 +88,14 @@ per the Definition of Done in `AGENT.md` — not partially.
 
 ## Current Focus
 
-Phase 2 Auth end-to-end is complete. Both backend and frontend infrastructure are established.
+Phase 3 Workspaces + RBAC is complete. Users can create workspaces, switch between them, invite members via an invite token system, and roles are properly verified by `requireRole` middleware.
 
 —
 
 ## Next Up
 
 _(What the next session should pick up first)_
-Phase 3 — Workspaces + RBAC. We need to implement Workspace CRUD, invite flows, and the requireRole middleware.
+Phase 4 — Projects + Tasks core CRUD. We need to implement Projects CRUD, Tasks CRUD, Kanban board UI, and Task forms.
 
 —
 
@@ -108,6 +108,8 @@ Phase 3 — Workspaces + RBAC. We need to implement Workspace CRUD, invite flows
 |---|---|---|
 | _(example)_ | Refresh tokens stored as opaque random strings, not JWTs | Lets us revoke individual sessions server-side; a JWT refresh token can't be invalidated before expiry without a blocklist |
 | 2026-09-14 | Used DB update to revoke token family on reuse | Instead of tracking `refreshTokenVersion` per user, implemented `revokeAllUserTokens` in auth repository which flags all user tokens as revoked upon detecting reuse. |
+| 2026-09-16 | Added `workspace_invites` table for invite flow | Instead of stubbing invites or creating dummy users, created a dedicated table to handle pending invites via a token, which a user can accept. |
+| 2026-09-16 | Added `WelcomeScreen` component | Enforces that a user creates or joins a workspace before accessing the dashboard, ensuring `activeWorkspace` is always present. |
 
 ## Known Issues / Notes for Next Session
 

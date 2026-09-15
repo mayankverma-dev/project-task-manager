@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { axiosInstance } from '../../../api/axiosInstance.js';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
@@ -17,12 +17,14 @@ export const RegisterForm = () => {
     resolver: zodResolver(registerSchema)
   });
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const returnTo = searchParams.get('returnTo');
   
   const onSubmit = async (data) => {
     try {
       await axiosInstance.post('/auth/register', data);
-      toast.success('Registration successful. Please log in.');
-      navigate('/login');
+      toast.success('Account created successfully');
+      navigate(returnTo ? `/login?returnTo=${encodeURIComponent(returnTo)}` : '/login');
     } catch (error) {
       toast.error(error.response?.data?.error?.message || 'Registration failed');
     }
@@ -68,7 +70,7 @@ export const RegisterForm = () => {
         </button>
       </form>
       <p className="mt-4 text-center text-sm text-gray-600">
-        Already have an account? <Link to="/login" className="text-blue-600 hover:underline">Sign in</Link>
+        Already have an account? <Link to={`/login${returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : ''}`} className="text-blue-600 hover:underline">Sign in</Link>
       </p>
     </div>
   );
