@@ -18,7 +18,7 @@ export const refreshTokens = pgTable('refresh_tokens', {
   userAgent: varchar('user_agent', { length: 512 }),
   ip: varchar('ip', { length: 45 }),
   expiresAt: timestamp('expires_at').notNull(),
-  revokedAt: timestamp('revoked_at'),
-  replacedById: uuid('replaced_by_id'),
+  revokedAt: timestamp('revoked_at'), // This will store the time when the token was revoked.
+  replacedById: uuid('replaced_by_id'), // This will store the id of the new token.
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });

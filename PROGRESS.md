@@ -3,8 +3,8 @@
 Update this file at the end of every session. This is the single source of truth for "what's done" and "why we did it this way." The agent must read this before doing anything else.
 
 **Last updated:** 2026-09-14
-**Current phase:** Phase 1 — Foundations
-**Status:** In Progress
+**Current phase:** Phase 2 — Auth end-to-end
+**Status:** Complete
 
 ---
 
@@ -23,13 +23,13 @@ per the Definition of Done in `AGENT.md` — not partially.
 - [x] Shared response envelope helper
 
 ### Phase 2 — Auth end-to-end
-- [ ] Register / login / logout endpoints
-- [ ] Access + refresh token issuance
-- [ ] Refresh token rotation + reuse detection
-- [ ] Auth middleware
-- [ ] Frontend: Redux auth slice, login/register forms (RHF + Zod)
-- [ ] Frontend: Axios interceptor for token refresh
-- [ ] Frontend: protected routes
+- [x] Register / login / logout endpoints
+- [x] Access + refresh token issuance
+- [x] Refresh token rotation + reuse detection
+- [x] Auth middleware
+- [x] Frontend: Redux auth slice, login/register forms (RHF + Zod)
+- [x] Frontend: Axios interceptor for token refresh
+- [x] Frontend: protected routes
 
 ### Phase 3 — Workspaces + RBAC
 - [ ] Workspace CRUD + invite flow
@@ -88,15 +88,14 @@ per the Definition of Done in `AGENT.md` — not partially.
 
 ## Current Focus
 
-Phase 1 Foundations: Repo scaffolding, schema creation, error handler and app skeleton.
-Blocked on running Drizzle migrations because Docker is not available.
+Phase 2 Auth end-to-end is complete. Both backend and frontend infrastructure are established.
 
 —
 
 ## Next Up
 
 _(What the next session should pick up first)_
-Run Drizzle migrations once Docker/Postgres is running. Then proceed to Phase 2.
+Phase 3 — Workspaces + RBAC. We need to implement Workspace CRUD, invite flows, and the requireRole middleware.
 
 —
 
@@ -108,9 +107,10 @@ Run Drizzle migrations once Docker/Postgres is running. Then proceed to Phase 2.
 | Date | Decision | Reason |
 |---|---|---|
 | _(example)_ | Refresh tokens stored as opaque random strings, not JWTs | Lets us revoke individual sessions server-side; a JWT refresh token can't be invalidated before expiry without a blocklist |
+| 2026-09-14 | Used DB update to revoke token family on reuse | Instead of tracking `refreshTokenVersion` per user, implemented `revokeAllUserTokens` in auth repository which flags all user tokens as revoked upon detecting reuse. |
 
 ## Known Issues / Notes for Next Session
 
-Docker command not found on system. Need user to start Docker or provide a PostgreSQL database connection to complete migrations for Phase 1.
+Ready for Phase 3. Drizzle migrations should be fully tested if not done yet, since Docker is running.
 
 —

@@ -5,6 +5,8 @@ import compression from 'compression';
 import pinoHttp from 'pino-http';
 import { logger } from './utils/logger.js';
 import { errorHandler } from './middlewares/errorHandler.middleware.js';
+import cookieParser from 'cookie-parser';
+import authRoutes from './modules/auth/auth.routes.js';
 
 const app = express();
 
@@ -16,6 +18,7 @@ app.use(cors({
 app.use(compression());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 app.use(pinoHttp({ logger }));
 
@@ -23,6 +26,8 @@ app.use(pinoHttp({ logger }));
 app.get('/api/v1/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
+
+app.use('/api/v1/auth', authRoutes);
 
 // Central error handler
 app.use(errorHandler);
