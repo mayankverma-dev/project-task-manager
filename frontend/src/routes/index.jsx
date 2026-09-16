@@ -52,6 +52,8 @@ const AuthenticatedApp = () => {
       const stillExists = workspaces.find(w => w.id === activeWorkspace.id);
       if (!stillExists && workspaces.length > 0) {
         dispatch(setActiveWorkspace(workspaces[0]));
+      } else if (stillExists && JSON.stringify(stillExists) !== JSON.stringify(activeWorkspace)) {
+        dispatch(setActiveWorkspace(stillExists));
       }
     }
   }, [workspaces, activeWorkspace, dispatch]);

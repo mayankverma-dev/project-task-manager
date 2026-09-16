@@ -1,7 +1,19 @@
 import { createSlice } from '@reduxjs/toolkit';
 
+const loadActiveWorkspace = () => {
+  try {
+    const serializedState = localStorage.getItem('activeWorkspace');
+    if (serializedState === null) {
+      return null;
+    }
+    return JSON.parse(serializedState);
+  } catch (err) {
+    return null;
+  }
+};
+
 const initialState = {
-  activeWorkspace: null, // { id, name, slug, ownerId, createdAt, role }
+  activeWorkspace: loadActiveWorkspace(),
 };
 
 const workspaceSlice = createSlice({
@@ -10,9 +22,19 @@ const workspaceSlice = createSlice({
   reducers: {
     setActiveWorkspace: (state, action) => {
       state.activeWorkspace = action.payload;
+      try {
+        localStorage.setItem('activeWorkspace', JSON.stringify(action.payload));
+      } catch (err) {
+        // Ignore write errors
+      }
     },
     clearActiveWorkspace: (state) => {
       state.activeWorkspace = null;
+      try {
+        localStorage.removeItem('activeWorkspace');
+      } catch (err) {
+        // Ignore write errors
+      }
     }
   },
 });
