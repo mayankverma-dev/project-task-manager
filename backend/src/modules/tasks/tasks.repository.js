@@ -1,6 +1,7 @@
 import { db } from '../../db/db.js';
 import { tasks } from '../../db/schema/tasks.js';
-import { eq, and, sql, asc, desc, ilike, gt, lt } from 'drizzle-orm';
+import { eq, and, sql, asc, desc, ilike, gt, lt, getTableColumns } from 'drizzle-orm';
+import { users } from '../../db/schema/auth.js';
 
 export const tasksRepository = {
   async create(data) {
@@ -22,7 +23,16 @@ export const tasksRepository = {
   async findAll(projectId, filters = {}) {
     const { cursor, limit = 50, search, status, priority, assignee, sortBy = 'position', sortOrder = 'asc' } = filters;
     
-    let query = db.select().from(tasks).where(eq(tasks.projectId, projectId));
+    let query = db
+      .select({
+        ...getTableColumns(tasks),
+        commentCount: sql`(SELECT COUNT(*)::int FROM comments WHERE comments.task_id = tasks.id)`.as('commentCount'),
+        createdByName: users.name,
+        createdByEmail: users.email
+      })
+      .from(tasks)
+      .leftJoin(users, eq(tasks.createdBy, users.id))
+      .where(eq(tasks.projectId, projectId));
     const conditions = [eq(tasks.projectId, projectId)];
 
     if (search) {

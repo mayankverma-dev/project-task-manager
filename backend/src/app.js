@@ -10,6 +10,7 @@ import authRoutes from './modules/auth/auth.routes.js';
 import workspacesRoutes from './modules/workspaces/workspaces.routes.js';
 import projectsRoutes from './modules/projects/projects.routes.js';
 import tasksRoutes from './modules/tasks/tasks.routes.js';
+import commentsRoutes from './modules/comments/comments.routes.js';
 const app = express();
 
 app.use(helmet());
@@ -33,6 +34,7 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/workspaces', workspacesRoutes);
 app.use('/api/v1/workspaces/:workspaceId/projects', projectsRoutes);
 app.use('/api/v1/projects/:projectId/tasks', tasksRoutes);
+app.use('/api/v1/tasks/:taskId/comments', commentsRoutes);
 // Central error handler
 app.use(errorHandler);
 

@@ -5,6 +5,7 @@ import { requireRole } from '../../middlewares/rbac.middleware.js';
 import { validate } from '../../middlewares/validate.middleware.js';
 import { asyncHandler } from '../../utils/asyncHandler.js';
 import { idempotency } from '../../middlewares/idempotency.middleware.js';
+import { generalRateLimiter } from '../../middlewares/rateLimit.middleware.js';
 import {
   createProjectSchema,
   updateProjectSchema,
@@ -17,6 +18,7 @@ const router = Router({ mergeParams: true });
 
 // Apply auth middleware to all project routes
 router.use(authenticate);
+router.use(generalRateLimiter);
 
 router.post(
   '/',

@@ -2,9 +2,9 @@
 
 Update this file at the end of every session. This is the single source of truth for "what's done" and "why we did it this way." The agent must read this before doing anything else.
 
-**Last updated:** 2026-09-14
-**Current phase:** Phase 5 — Pagination, search, filter, sort
-**Status:** In Progress
+**Last updated:** 2026-09-16
+**Current phase:** Phase 8 — Idempotency + rate limiting
+**Status:** Completed
 
 ---
 
@@ -54,13 +54,13 @@ per the Definition of Done in `AGENT.md` — not partially.
 - [x] Invalidation wired to every mutation
 
 ### Phase 7 — Optimistic UI
-- [x] Drag-and-drop status change (optimistic + rollback)
-- [ ] Comment creation (optimistic + rollback)
+- `[x]` Drag-and-drop status change (optimistic + rollback)
+- `[x]` Comment creation (optimistic + rollback)
 
 ### Phase 8 — Idempotency + rate limiting
-- [x] Idempotency middleware + `idempotency_keys` table
-- [x] `useIdempotencyKey` hook wired into task creation
-- [ ] Rate limiting tiers (auth strict, general relaxed)
+- `[x]` Idempotency middleware + `idempotency_keys` table
+- `[x]` `useIdempotencyKey` hook wired into task creation
+- `[x]` Rate limiting tiers (auth strict, general relaxed)
 
 ### Phase 9 — Real-time layer
 - [ ] WebSocket server + auth on connect
@@ -86,14 +86,14 @@ per the Definition of Done in `AGENT.md` — not partially.
 
 ## Current Focus
 
-Phase 6 Redis caching is complete. Implemented a `cache.js` utility, added the backend endpoint for dashboard statistics and wired cache invalidation to all task mutations (create, update, delete). Created a `WorkspaceDashboard` component on the frontend to visualize these stats.
+Phase 7 (Optimistic UI) and Phase 8 (Rate Limiting) are now complete. We implemented a complete comments module in the backend and an optimistic comment UI in the frontend utilizing TanStack Query's `onMutate`. We also updated `rateLimit.middleware.js` to support rate limiting per user.
 
 —
 
 ## Next Up
 
 _(What the next session should pick up first)_
-Phase 7 — Optimistic UI. We need to implement optimistic updates and rollbacks for comment creation. Drag-and-drop optimistic status changes are already partially implemented.
+Phase 9 — Real-time layer. We need to implement a WebSocket server with auth on connect, a Redis pub/sub relay, and a frontend `useWebSocket` hook pushing into the query cache.
 
 —
 
@@ -111,6 +111,8 @@ Phase 7 — Optimistic UI. We need to implement optimistic updates and rollbacks
 | 2026-09-16 | Drag-and-drop and Idempotency | Pulled these features forward to implement a complete Kanban board experience rather than a stubbed version. |
 | 2026-09-16 | Used `tsvector` GENERATED ALWAYS AS | Ensures search vector is automatically managed by Postgres, queried via GIN index. |
 | 2026-09-16 | Filter State via URL `useSearchParams` | Adopted react-router `useSearchParams` instead of `useReducer` to sync filters (status, search, priority) natively with the URL. |
+| 2026-09-16 | Optimistic UI Comments | Implemented a dedicated task details modal with a comments section relying on TanStack Query optimistic updates. |
+| 2026-09-16 | Rate Limit Key Generator | Modified `generalRateLimiter` to key by `req.user.id || req.ip` instead of just IP to comply with PRD per user limits. |
 
 ## Known Issues / Notes for Next Session
 

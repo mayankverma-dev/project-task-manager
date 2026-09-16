@@ -1,6 +1,6 @@
 import { and, eq } from 'drizzle-orm';
 import { db } from '../db/db.js';
-import { workspaceMembers, projects } from '../db/schema/index.js';
+import { workspaceMembers, projects, tasks } from '../db/schema/index.js';
 import { ApiError } from '../utils/ApiError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 
@@ -17,7 +17,21 @@ export const requireRole = (allowedRoles) => {
     // - Direct workspace routes:  req.params.workspaceId  or  req.params.id  (for /workspaces/:id)
     // - Project-nested routes:    req.params.workspaceId propagated via mergeParams
     // - Task routes under /projects/:projectId/tasks: look up project to get workspaceId
-    let workspaceId = req.params.workspaceId || (req.params.id && !req.params.projectId ? req.params.id : null);
+    let workspaceId = req.params.workspaceId || (req.params.id && !req.params.projectId && !req.params.taskId ? req.params.id : null);
+
+    if (!workspaceId && req.params.taskId) {
+      // Resolve workspace from the task -> project
+      const [result] = await db
+        .select({ workspaceId: projects.workspaceId })
+        .from(tasks)
+        .innerJoin(projects, eq(tasks.projectId, projects.id))
+        .where(eq(tasks.id, req.params.taskId));
+
+      if (!result) {
+        throw new ApiError(404, 'NOT_FOUND', 'Task not found');
+      }
+      workspaceId = result.workspaceId;
+    }
 
     if (!workspaceId && req.params.projectId) {
       // Resolve workspace from the project

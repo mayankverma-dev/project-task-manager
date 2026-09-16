@@ -25,4 +25,5 @@ export const generalRateLimiter = createRateLimiter({
   max: 300,
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: (req) => req.user?.id || req.ip,
 });

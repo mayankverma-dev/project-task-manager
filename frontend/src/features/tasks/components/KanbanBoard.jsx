@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 import { TaskCard } from './TaskCard';
 import { useOptimisticTaskUpdate } from '../hooks/useOptimisticTaskUpdate';
+import { TaskDetailsModal } from './TaskDetailsModal';
 
 const COLUMNS = [
   { id: 'todo', title: 'To Do' },
@@ -12,6 +13,7 @@ const COLUMNS = [
 
 export const KanbanBoard = ({ projectId, tasks = [] }) => {
   const { mutate: updateTask } = useOptimisticTaskUpdate();
+  const [selectedTask, setSelectedTask] = useState(null);
 
   const groupedTasks = useMemo(() => {
     const groups = { todo: [], in_progress: [], in_review: [], done: [] };
@@ -86,7 +88,7 @@ export const KanbanBoard = ({ projectId, tasks = [] }) => {
                   }`}
                 >
                   {(groupedTasks[column.id] || []).map((task, index) => (
-                    <TaskCard key={task.id} task={task} index={index} />
+                    <TaskCard key={task.id} task={task} index={index} onClick={() => setSelectedTask(task)} />
                   ))}
                   {provided.placeholder}
                 </div>
@@ -95,6 +97,11 @@ export const KanbanBoard = ({ projectId, tasks = [] }) => {
           </div>
         ))}
       </div>
+      <TaskDetailsModal
+        task={selectedTask}
+        isOpen={!!selectedTask}
+        onClose={() => setSelectedTask(null)}
+      />
     </DragDropContext>
   );
 };
