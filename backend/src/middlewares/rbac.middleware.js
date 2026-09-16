@@ -1,6 +1,6 @@
 import { and, eq } from 'drizzle-orm';
 import { db } from '../db/db.js';
-import { workspaceMembers } from '../db/schema/index.js';
+import { workspaceMembers, projects } from '../db/schema/index.js';
 import { ApiError } from '../utils/ApiError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 
@@ -11,11 +11,26 @@ const ROLE_HIERARCHY = {
   owner: 4,
 };
 
-export const requireRole = (minRole) => {
+export const requireRole = (allowedRoles) => {
   return asyncHandler(async (req, res, next) => {
-    // The workspace ID could be in req.params.workspaceId (e.g. nested routes like /workspaces/:workspaceId/projects)
-    // or req.params.id (e.g. /workspaces/:id)
-    const workspaceId = req.params.workspaceId || req.params.id;
+    // Resolve workspaceId from params:
+    // - Direct workspace routes:  req.params.workspaceId  or  req.params.id  (for /workspaces/:id)
+    // - Project-nested routes:    req.params.workspaceId propagated via mergeParams
+    // - Task routes under /projects/:projectId/tasks: look up project to get workspaceId
+    let workspaceId = req.params.workspaceId || (req.params.id && !req.params.projectId ? req.params.id : null);
+
+    if (!workspaceId && req.params.projectId) {
+      // Resolve workspace from the project
+      const [project] = await db.select({ workspaceId: projects.workspaceId })
+        .from(projects)
+        .where(eq(projects.id, req.params.projectId));
+
+      if (!project) {
+        throw new ApiError(404, 'NOT_FOUND', 'Project not found');
+      }
+      workspaceId = project.workspaceId;
+    }
+
     if (!workspaceId) {
       throw new ApiError(400, 'VALIDATION_ERROR', 'Workspace ID is required for role check');
     }
@@ -37,14 +52,19 @@ export const requireRole = (minRole) => {
     }
 
     const userRoleWeight = ROLE_HIERARCHY[membership.role];
+    // allowedRoles can be a string (min role) or an array of allowed roles
+    const minRole = Array.isArray(allowedRoles)
+      ? allowedRoles.reduce((min, r) => (ROLE_HIERARCHY[r] < ROLE_HIERARCHY[min] ? r : min), allowedRoles[0])
+      : allowedRoles;
     const minRoleWeight = ROLE_HIERARCHY[minRole];
 
     if (userRoleWeight < minRoleWeight) {
       throw new ApiError(403, 'FORBIDDEN', `Requires at least ${minRole} role`);
     }
 
-    // Attach role to request for downstream handlers if they need it
+    // Attach role and resolved workspaceId to request for downstream handlers
     req.userRole = membership.role;
+    req.workspaceId = workspaceId;
     next();
   });
 };

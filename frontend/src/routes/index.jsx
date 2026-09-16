@@ -10,7 +10,7 @@ const LoginForm = lazy(() => import('../features/auth/components/LoginForm.jsx')
 const RegisterForm = lazy(() => import('../features/auth/components/RegisterForm.jsx').then(m => ({ default: m.RegisterForm })));
 const WelcomeScreen = lazy(() => import('../features/workspaces/components/WelcomeScreen.jsx').then(m => ({ default: m.WelcomeScreen })));
 const AcceptInviteScreen = lazy(() => import('../features/workspaces/components/AcceptInviteScreen.jsx').then(m => ({ default: m.AcceptInviteScreen })));
-
+const ProjectView = lazy(() => import('../features/projects/components/ProjectView.jsx').then(m => ({ default: m.ProjectView })));
 const ProtectedRoute = ({ children }) => {
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   if (!isAuthenticated) {
@@ -65,27 +65,34 @@ const AuthenticatedApp = ({ children }) => {
 
 import { WorkspaceSwitcher } from '../features/workspaces/components/WorkspaceSwitcher.jsx';
 import { WorkspaceMembers } from '../features/workspaces/components/WorkspaceMembers.jsx';
+import { ProjectList } from '../features/projects/components/ProjectList.jsx';
 
 // Placeholder Dashboard for now
-const Dashboard = () => (
-  <div className="flex h-full">
-    <aside className="w-64 bg-gray-800 text-white p-4 flex flex-col">
-      <div className="mb-8">
-        <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">Workspace</h2>
-        <WorkspaceSwitcher />
-      </div>
-      <nav className="flex-1">
-        {/* Navigation items will go here */}
-      </nav>
-    </aside>
-    <main className="flex-1 p-8 overflow-y-auto bg-gray-100">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Dashboard</h1>
-      <p className="text-gray-600">Welcome to Project Task Manager</p>
-      
-      <WorkspaceMembers />
-    </main>
-  </div>
-);
+const Dashboard = () => {
+  const activeWorkspace = useSelector(state => state.workspaces.activeWorkspace);
+
+  return (
+    <div className="flex h-full">
+      <aside className="flex flex-col w-64 p-4 text-white bg-gray-800">
+        <div className="mb-8">
+          <h2 className="mb-2 text-sm font-semibold tracking-wider text-gray-400 uppercase">Workspace</h2>
+          <WorkspaceSwitcher />
+        </div>
+        <nav className="flex-1">
+          {activeWorkspace && (
+            <ProjectList workspaceId={activeWorkspace.id} />
+          )}
+        </nav>
+      </aside>
+      <main className="flex-1 p-8 overflow-y-auto bg-gray-100">
+        <h1 className="mb-6 text-2xl font-bold text-gray-900">Dashboard</h1>
+        <p className="text-gray-600">Welcome to Project Task Manager</p>
+
+        <WorkspaceMembers />
+      </main>
+    </div>
+  );
+};
 
 export const AppRoutes = () => {
   const isInitialized = useAuthInit();
@@ -108,11 +115,18 @@ export const AppRoutes = () => {
           </div>
         } />
         <Route path="/accept-invite" element={<AcceptInviteScreen />} />
-        
+
         <Route path="/" element={
           <ProtectedRoute>
             <AuthenticatedApp>
               <Dashboard />
+            </AuthenticatedApp>
+          </ProtectedRoute>
+        } />
+        <Route path="/workspaces/:workspaceId/projects/:projectId" element={
+          <ProtectedRoute>
+            <AuthenticatedApp>
+              <ProjectView />
             </AuthenticatedApp>
           </ProtectedRoute>
         } />

@@ -8,7 +8,8 @@ export const validate = (schema) => (req, res, next) => {
       params: req.params,
     });
     if (parsed.body) req.body = parsed.body;
-    if (parsed.query) req.query = parsed.query;
+    // req.query is a getter-only property in Node.js v24+, use Object.assign to mutate in-place
+    if (parsed.query) Object.assign(req.query, parsed.query);
     if (parsed.params) req.params = parsed.params;
     next();
   } catch (error) {

@@ -3,7 +3,7 @@
 Update this file at the end of every session. This is the single source of truth for "what's done" and "why we did it this way." The agent must read this before doing anything else.
 
 **Last updated:** 2026-09-14
-**Current phase:** Phase 4 — Projects + Tasks core CRUD
+**Current phase:** Phase 5 — Pagination, search, filter, sort
 **Status:** In Progress
 
 ---
@@ -38,10 +38,10 @@ per the Definition of Done in `AGENT.md` — not partially.
 - [x] Frontend: workspace switcher, `usePermission` hook
 
 ### Phase 4 — Projects + Tasks core CRUD
-- [ ] Projects CRUD
-- [ ] Tasks CRUD
-- [ ] Kanban board UI
-- [ ] Task form (RHF + Zod)
+- [x] Projects CRUD
+- [x] Tasks CRUD
+- [x] Kanban board UI
+- [x] Task form (RHF + Zod)
 
 ### Phase 5 — Pagination, search, filter, sort
 - [ ] Cursor pagination on tasks list
@@ -54,12 +54,12 @@ per the Definition of Done in `AGENT.md` — not partially.
 - [ ] Invalidation wired to every mutation
 
 ### Phase 7 — Optimistic UI
-- [ ] Drag-and-drop status change (optimistic + rollback)
+- [x] Drag-and-drop status change (optimistic + rollback)
 - [ ] Comment creation (optimistic + rollback)
 
 ### Phase 8 — Idempotency + rate limiting
-- [ ] Idempotency middleware + `idempotency_keys` table
-- [ ] `useIdempotencyKey` hook wired into task creation
+- [x] Idempotency middleware + `idempotency_keys` table
+- [x] `useIdempotencyKey` hook wired into task creation
 - [ ] Rate limiting tiers (auth strict, general relaxed)
 
 ### Phase 9 — Real-time layer
@@ -88,14 +88,14 @@ per the Definition of Done in `AGENT.md` — not partially.
 
 ## Current Focus
 
-Phase 3 Workspaces + RBAC is complete. Users can create workspaces, switch between them, invite members via an invite token system, and roles are properly verified by `requireRole` middleware.
+Phase 4 Projects + Tasks CRUD is complete. We also pulled in Idempotency middleware (Phase 8) and Optimistic UI drag-and-drop (Phase 7) per the user's request, and they are fully functional. The Kanban board supports instant visual updates when dragging tasks across columns.
 
 —
 
 ## Next Up
 
 _(What the next session should pick up first)_
-Phase 4 — Projects + Tasks core CRUD. We need to implement Projects CRUD, Tasks CRUD, Kanban board UI, and Task forms.
+Phase 5 — Pagination, search, filter, sort. We need to implement cursor pagination on the tasks list, full-text search, and a filter/sort UI with URL sync on the frontend.
 
 —
 
@@ -110,6 +110,7 @@ Phase 4 — Projects + Tasks core CRUD. We need to implement Projects CRUD, Task
 | 2026-09-14 | Used DB update to revoke token family on reuse | Instead of tracking `refreshTokenVersion` per user, implemented `revokeAllUserTokens` in auth repository which flags all user tokens as revoked upon detecting reuse. |
 | 2026-09-16 | Added `workspace_invites` table for invite flow | Instead of stubbing invites or creating dummy users, created a dedicated table to handle pending invites via a token, which a user can accept. |
 | 2026-09-16 | Added `WelcomeScreen` component | Enforces that a user creates or joins a workspace before accessing the dashboard, ensuring `activeWorkspace` is always present. |
+| 2026-09-16 | Drag-and-drop and Idempotency | Pulled these features forward to implement a complete Kanban board experience rather than a stubbed version. |
 
 ## Known Issues / Notes for Next Session
 
