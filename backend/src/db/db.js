@@ -9,3 +9,11 @@ const connectionString = process.env.DATABASE_URL || 'postgres://postgres:passwo
 
 const client = postgres(connectionString);
 export const db = drizzle(client, { schema });
+
+export const checkDbConnection = async () => {
+  try {
+    await client`SELECT 1`;
+  } catch (error) {
+    throw error;
+  }
+};
