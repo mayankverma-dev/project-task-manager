@@ -15,6 +15,13 @@
       "when": 1789501494629,
       "tag": "0001_outgoing_korath",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789553249361,
+      "tag": "0002_stale_thaddeus_ross",
+      "breakpoints": true
     }
   ]
 }

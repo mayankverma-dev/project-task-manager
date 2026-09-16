@@ -44,10 +44,10 @@ per the Definition of Done in `AGENT.md` — not partially.
 - [x] Task form (RHF + Zod)
 
 ### Phase 5 — Pagination, search, filter, sort
-- [ ] Cursor pagination on tasks list
-- [ ] Full-text search (tsvector + GIN index)
-- [ ] Filter/sort query params
-- [ ] Frontend: filter `useReducer`, URL sync, `useInfiniteScroll`
+- [x] Cursor pagination on tasks list
+- [x] Full-text search (tsvector + GIN index)
+- [x] Filter/sort query params
+- [x] Frontend: filter `useReducer` (via search params), URL sync, `useInfiniteScroll`
 
 ### Phase 6 — Redis caching
 - [ ] Cache-aside on task list + dashboard reads
@@ -86,16 +86,14 @@ per the Definition of Done in `AGENT.md` — not partially.
 
 ## Current Focus
 
-## Current Focus
-
-Phase 4 Projects + Tasks CRUD is complete. We also pulled in Idempotency middleware (Phase 8) and Optimistic UI drag-and-drop (Phase 7) per the user's request, and they are fully functional. The Kanban board supports instant visual updates when dragging tasks across columns.
+Phase 5 Pagination, Search, Filter, Sort is complete. We added cursor-based pagination and a GIN index on a `tsvector` generated column for task search. The frontend successfully implements filtering and search synchronized with the URL.
 
 —
 
 ## Next Up
 
 _(What the next session should pick up first)_
-Phase 5 — Pagination, search, filter, sort. We need to implement cursor pagination on the tasks list, full-text search, and a filter/sort UI with URL sync on the frontend.
+Phase 6 — Redis caching. We need to implement cache-aside on the task list and dashboard reads, and ensure invalidation is wired to every mutation.
 
 —
 
@@ -111,6 +109,8 @@ Phase 5 — Pagination, search, filter, sort. We need to implement cursor pagina
 | 2026-09-16 | Added `workspace_invites` table for invite flow | Instead of stubbing invites or creating dummy users, created a dedicated table to handle pending invites via a token, which a user can accept. |
 | 2026-09-16 | Added `WelcomeScreen` component | Enforces that a user creates or joins a workspace before accessing the dashboard, ensuring `activeWorkspace` is always present. |
 | 2026-09-16 | Drag-and-drop and Idempotency | Pulled these features forward to implement a complete Kanban board experience rather than a stubbed version. |
+| 2026-09-16 | Used `tsvector` GENERATED ALWAYS AS | Ensures search vector is automatically managed by Postgres, queried via GIN index. |
+| 2026-09-16 | Filter State via URL `useSearchParams` | Adopted react-router `useSearchParams` instead of `useReducer` to sync filters (status, search, priority) natively with the URL. |
 
 ## Known Issues / Notes for Next Session
 

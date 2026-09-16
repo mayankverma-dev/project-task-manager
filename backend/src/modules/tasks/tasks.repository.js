@@ -20,40 +20,63 @@ export const tasksRepository = {
   },
 
   async findAll(projectId, filters = {}) {
-    const { cursor, limit, search, status, priority, assignee, sortBy, sortOrder } = filters;
+    const { cursor, limit = 50, search, status, priority, assignee, sortBy = 'position', sortOrder = 'asc' } = filters;
     
     let query = db.select().from(tasks).where(eq(tasks.projectId, projectId));
     const conditions = [eq(tasks.projectId, projectId)];
 
     if (search) {
-      conditions.push(ilike(tasks.title, `%${search}%`));
+      conditions.push(sql`to_tsvector('english', coalesce(${tasks.title}, '') || ' ' || coalesce(${tasks.description}, '')) @@ plainto_tsquery('english', ${search})`);
     }
     if (status) conditions.push(eq(tasks.status, status));
     if (priority) conditions.push(eq(tasks.priority, priority));
     if (assignee) conditions.push(eq(tasks.assigneeId, assignee));
 
-    // Simple cursor based on ID for this phase to avoid complex sort/cursor mapping
+    const sortField = tasks[sortBy] || tasks.position;
+
     if (cursor) {
-       // Assuming cursor is an ID and sort is by position ASC for now, simplified
-       // In a full cursor pagination, cursor decodes to (sortColumnValue, id)
-       // This is a minimal working implementation
+      try {
+        const decoded = JSON.parse(Buffer.from(cursor, 'base64').toString('utf-8'));
+        const cursorValue = decoded.sortValue;
+        const cursorId = decoded.id;
+
+        if (sortOrder === 'desc') {
+          conditions.push(sql`(${sortField} < ${cursorValue} OR (${sortField} = ${cursorValue} AND ${tasks.id} > ${cursorId}))`);
+        } else {
+          conditions.push(sql`(${sortField} > ${cursorValue} OR (${sortField} = ${cursorValue} AND ${tasks.id} > ${cursorId}))`);
+        }
+      } catch (e) {
+        // ignore invalid cursor
+      }
     }
 
     query = query.where(and(...conditions));
 
-    const sortField = tasks[sortBy] || tasks.position;
-    query = query.orderBy(sortOrder === 'desc' ? desc(sortField) : asc(sortField));
+    query = query.orderBy(
+      sortOrder === 'desc' ? desc(sortField) : asc(sortField),
+      asc(tasks.id)
+    );
     
-    query = query.limit(limit + 1); // +1 to check for hasMore
+    query = query.limit(limit + 1);
 
     const results = await query;
     const hasMore = results.length > limit;
     if (hasMore) results.pop();
 
+    let nextCursor = null;
+    if (hasMore && results.length > 0) {
+      const lastTask = results[results.length - 1];
+      let sortValue = lastTask[sortBy];
+      if (sortValue instanceof Date) {
+        sortValue = sortValue.toISOString();
+      }
+      nextCursor = Buffer.from(JSON.stringify({ sortValue, id: lastTask.id })).toString('base64');
+    }
+
     return {
       tasks: results,
       hasMore,
-      nextCursor: hasMore ? results[results.length - 1].id : null
+      nextCursor
     };
   },
 

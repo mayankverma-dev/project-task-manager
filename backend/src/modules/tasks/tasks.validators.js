@@ -44,7 +44,7 @@ export const listTasksSchema = z.object({
   }),
   query: z.object({
     cursor: z.string().optional(),
-    limit: z.coerce.number().min(1).max(100).optional().default(20),
+    limit: z.coerce.number().min(1).max(100).optional().default(50),
     search: z.string().optional(),
     status: z.enum(['todo', 'in_progress', 'in_review', 'done']).optional(),
     priority: z.enum(['low', 'medium', 'high', 'urgent']).optional(),

@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { tasksApi } from '../../../api/tasks.api';
 
 export const useTasks = (projectId, filters = {}) => {
@@ -10,6 +10,7 @@ export const useTasks = (projectId, filters = {}) => {
     },
     getNextPageParam: (lastPage) => lastPage.meta?.nextCursor || undefined,
     enabled: !!projectId,
+    placeholderData: keepPreviousData,
   });
 };
 

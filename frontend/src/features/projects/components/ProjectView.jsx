@@ -4,12 +4,16 @@ import { useProject } from '../hooks/useProjects';
 import { KanbanBoard } from '../../tasks/components/KanbanBoard';
 import { useTasks } from '../../tasks/hooks/useTasks';
 import { CreateTaskModal } from '../../tasks/components/CreateTaskModal';
+import { useTaskFilters } from '../../tasks/hooks/useTaskFilters';
+import { TaskFilters } from '../../tasks/components/TaskFilters';
 import { Plus } from 'lucide-react';
 
 export const ProjectView = () => {
   const { workspaceId, projectId } = useParams();
   const { data: projectResponse, isLoading: isLoadingProject } = useProject(workspaceId, projectId);
-  const { data: tasksResponse, isLoading: isLoadingTasks } = useTasks(projectId);
+  
+  const { apiFilters } = useTaskFilters();
+  const { data: tasksResponse, isLoading: isLoadingTasks, hasNextPage, fetchNextPage, isFetchingNextPage } = useTasks(projectId, apiFilters);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
 
   if (isLoadingProject || isLoadingTasks) {
@@ -41,9 +45,23 @@ export const ProjectView = () => {
         </button>
       </div>
 
+      <TaskFilters />
+
       <div className="flex-1 overflow-hidden">
         <KanbanBoard projectId={projectId} tasks={tasks} />
       </div>
+
+      {hasNextPage && (
+        <div className="flex justify-center p-4 border-t dark:border-neutral-800">
+          <button
+            onClick={() => fetchNextPage()}
+            disabled={isFetchingNextPage}
+            className="px-4 py-2 text-sm font-medium border rounded-md border-neutral-300 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-900 text-neutral-700 dark:text-neutral-300 disabled:opacity-50"
+          >
+            {isFetchingNextPage ? 'Loading more...' : 'Load More Tasks'}
+          </button>
+        </div>
+      )}
 
       <CreateTaskModal
         projectId={projectId}
