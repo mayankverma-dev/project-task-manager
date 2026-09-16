@@ -3,7 +3,7 @@
 Update this file at the end of every session. This is the single source of truth for "what's done" and "why we did it this way." The agent must read this before doing anything else.
 
 **Last updated:** 2026-09-16
-**Current phase:** Phase 8 — Idempotency + rate limiting
+**Current phase:** Phase 9 — Real-time layer
 **Status:** Completed
 
 ---
@@ -63,9 +63,9 @@ per the Definition of Done in `AGENT.md` — not partially.
 - `[x]` Rate limiting tiers (auth strict, general relaxed)
 
 ### Phase 9 — Real-time layer
-- [ ] WebSocket server + auth on connect
-- [ ] Redis pub/sub relay
-- [ ] Frontend `useWebSocket` hook pushing into query cache
+- `[x]` WebSocket server + auth on connect
+- `[x]` Redis pub/sub relay
+- `[x]` Frontend `useWebSocket` hook pushing into query cache
 
 ### Phase 10 — Background jobs
 - [ ] BullMQ queue + separate worker process
@@ -86,14 +86,14 @@ per the Definition of Done in `AGENT.md` — not partially.
 
 ## Current Focus
 
-Phase 7 (Optimistic UI) and Phase 8 (Rate Limiting) are now complete. We implemented a complete comments module in the backend and an optimistic comment UI in the frontend utilizing TanStack Query's `onMutate`. We also updated `rateLimit.middleware.js` to support rate limiting per user.
+Phase 9 (Real-time layer) is now complete. We implemented a WebSocket server with auth on connect, a Redis pub/sub relay, and a frontend `useWebSocket` hook triggering TanStack query invalidations for instant updates across clients.
 
 —
 
 ## Next Up
 
 _(What the next session should pick up first)_
-Phase 9 — Real-time layer. We need to implement a WebSocket server with auth on connect, a Redis pub/sub relay, and a frontend `useWebSocket` hook pushing into the query cache.
+Phase 10 — Background jobs. We need to implement a BullMQ queue backed by Redis, running on a separate worker process (`worker.js`) to process jobs like welcome emails, digests, and idempotency key cleanup.
 
 —
 
@@ -113,6 +113,7 @@ Phase 9 — Real-time layer. We need to implement a WebSocket server with auth o
 | 2026-09-16 | Filter State via URL `useSearchParams` | Adopted react-router `useSearchParams` instead of `useReducer` to sync filters (status, search, priority) natively with the URL. |
 | 2026-09-16 | Optimistic UI Comments | Implemented a dedicated task details modal with a comments section relying on TanStack Query optimistic updates. |
 | 2026-09-16 | Rate Limit Key Generator | Modified `generalRateLimiter` to key by `req.user.id || req.ip` instead of just IP to comply with PRD per user limits. |
+| 2026-09-16 | Real-time Cache Invalidations | Instead of manual `setQueryData` array manipulations for cursor paginated queries on WebSocket events, opted for `invalidateQueries` to ensure cache safety and correctness while retaining instant "live" updates. |
 
 ## Known Issues / Notes for Next Session
 

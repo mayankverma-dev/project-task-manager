@@ -1,13 +1,25 @@
 import { commentsRepository } from './comments.repository.js';
 import { ApiError } from '../../utils/ApiError.js';
+import { tasksRepository } from '../tasks/tasks.repository.js';
+import { projectsRepository } from '../projects/projects.repository.js';
+import { emitToWorkspace } from '../../sockets/index.js';
 
 export const commentsService = {
   async createComment(taskId, userId, body) {
-    return commentsRepository.create({
+    const comment = await commentsRepository.create({
       taskId,
       userId,
       body
     });
+
+    const task = await tasksRepository.findById(taskId);
+    if (task) {
+      const project = await projectsRepository.findById(task.projectId);
+      if (project) {
+        emitToWorkspace(project.workspaceId, 'comment.created', { comment });
+      }
+    }
+    return comment;
   },
 
   async getComments(taskId, filters) {
@@ -31,5 +43,13 @@ export const commentsService = {
     }
     
     await commentsRepository.delete(id);
+    
+    const task = await tasksRepository.findById(taskId);
+    if (task) {
+      const project = await projectsRepository.findById(task.projectId);
+      if (project) {
+        emitToWorkspace(project.workspaceId, 'comment.deleted', { commentId: id, taskId });
+      }
+    }
   }
 };

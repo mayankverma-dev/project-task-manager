@@ -2,6 +2,8 @@ import crypto from 'crypto';
 import { tasksRepository } from './tasks.repository.js';
 import { ApiError } from '../../utils/ApiError.js';
 import { getOrSetCache, invalidateCache } from '../../utils/cache.js';
+import { projectsRepository } from '../projects/projects.repository.js';
+import { emitToWorkspace } from '../../sockets/index.js';
 
 export const tasksService = {
   async createTask(projectId, userId, data) {
@@ -13,6 +15,11 @@ export const tasksService = {
     
     await invalidateCache(`cache:project:${projectId}:tasks:*`);
     await invalidateCache(`cache:workspace:*:dashboard`);
+    
+    const project = await projectsRepository.findById(projectId);
+    if (project) {
+      emitToWorkspace(project.workspaceId, 'task.created', { task });
+    }
     
     return task;
   },
@@ -51,6 +58,11 @@ export const tasksService = {
     await invalidateCache(`cache:project:${projectId}:tasks:*`);
     await invalidateCache(`cache:workspace:*:dashboard`);
     
+    const project = await projectsRepository.findById(projectId);
+    if (project) {
+      emitToWorkspace(project.workspaceId, 'task.updated', { task: updatedTask });
+    }
+    
     return updatedTask;
   },
 
@@ -63,5 +75,10 @@ export const tasksService = {
     
     await invalidateCache(`cache:project:${projectId}:tasks:*`);
     await invalidateCache(`cache:workspace:*:dashboard`);
+    
+    const project = await projectsRepository.findById(projectId);
+    if (project) {
+      emitToWorkspace(project.workspaceId, 'task.deleted', { taskId: id });
+    }
   }
 };

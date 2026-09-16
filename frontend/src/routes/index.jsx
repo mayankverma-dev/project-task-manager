@@ -5,6 +5,8 @@ import { Loader2, LayoutDashboard, Users as UsersIcon } from 'lucide-react';
 import { useAuthInit } from '../features/auth/hooks/useAuthInit.js';
 import { useWorkspaces } from '../features/workspaces/hooks/useWorkspaces.js';
 import { setActiveWorkspace } from '../features/workspaces/workspaceSlice.js';
+import { WebSocketProvider } from '../context/WebSocketContext.jsx';
+import { useRealTimeUpdates } from '../hooks/useRealTimeUpdates.js';
 
 import { WorkspaceSwitcher } from '../features/workspaces/components/WorkspaceSwitcher.jsx';
 import { WorkspaceMembers } from '../features/workspaces/components/WorkspaceMembers.jsx';
@@ -21,6 +23,11 @@ const ProtectedRoute = ({ children }) => {
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
+  return children;
+};
+
+const RealTimeWrapper = ({ children }) => {
+  useRealTimeUpdates();
   return children;
 };
 
@@ -122,7 +129,11 @@ export const AppRoutes = () => {
 
         <Route path="/" element={
           <ProtectedRoute>
-            <AuthenticatedApp />
+            <WebSocketProvider>
+              <RealTimeWrapper>
+                <AuthenticatedApp />
+              </RealTimeWrapper>
+            </WebSocketProvider>
           </ProtectedRoute>
         }>
           <Route index element={<WorkspaceDashboard />} />

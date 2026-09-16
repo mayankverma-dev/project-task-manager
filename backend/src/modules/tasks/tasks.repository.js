@@ -99,6 +99,11 @@ export const tasksRepository = {
     return task;
   },
 
+  async findById(id) {
+    const [task] = await db.select().from(tasks).where(eq(tasks.id, id)).limit(1);
+    return task;
+  },
+
   async update(id, data) {
     const [task] = await db
       .update(tasks)

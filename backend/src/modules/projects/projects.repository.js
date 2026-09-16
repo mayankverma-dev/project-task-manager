@@ -12,6 +12,11 @@ export const projectsRepository = {
     return await db.select().from(projects).where(eq(projects.workspaceId, workspaceId));
   },
 
+  async findById(id) {
+    const [project] = await db.select().from(projects).where(eq(projects.id, id)).limit(1);
+    return project;
+  },
+
   async findByIdAndWorkspace(id, workspaceId) {
     const [project] = await db
       .select()
