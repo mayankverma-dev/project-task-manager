@@ -64,5 +64,15 @@ export const workspacesController = {
       req.userRole // Set by requireRole middleware
     );
     res.json(apiResponse(updated));
-  }
+  },
+
+  async getPendingInvites(req, res) {
+    const invites = await workspacesService.getPendingInvites(req.params.id);
+    res.json(apiResponse(invites));
+  },
+
+  async cancelInvite(req, res) {
+    const result = await workspacesService.cancelInvite(req.params.id, req.params.inviteId);
+    res.json(apiResponse(result));
+  },
 };

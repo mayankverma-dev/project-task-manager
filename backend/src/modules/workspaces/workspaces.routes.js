@@ -77,4 +77,18 @@ router.patch(
   asyncHandler(workspacesController.updateMemberRole)
 );
 
+// Get pending invites for a workspace (requires admin role)
+router.get(
+  '/:id/invites',
+  requireRole('admin'),
+  asyncHandler(workspacesController.getPendingInvites)
+);
+
+// Cancel / delete a specific invite (requires admin role)
+router.delete(
+  '/:id/invites/:inviteId',
+  requireRole('admin'),
+  asyncHandler(workspacesController.cancelInvite)
+);
+
 export default router;

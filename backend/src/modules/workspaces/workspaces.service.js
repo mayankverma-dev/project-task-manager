@@ -184,5 +184,26 @@ export const workspacesService = {
     return await getOrSetCache(cacheKey, ttl, async () => {
       return await workspacesRepository.getDashboardStats(workspaceId);
     });
-  }
+  },
+
+  async getPendingInvites(workspaceId) {
+    const invites = await workspacesRepository.getPendingInvites(workspaceId);
+    const now = new Date();
+    return invites.map((invite) => ({
+      id: invite.id,
+      email: invite.email,
+      role: invite.role,
+      createdAt: invite.createdAt,
+      expiresAt: invite.expiresAt,
+      isExpired: now > new Date(invite.expiresAt),
+    }));
+  },
+
+  async cancelInvite(workspaceId, inviteId) {
+    const deleted = await workspacesRepository.deleteInviteById(inviteId, workspaceId);
+    if (!deleted) {
+      throw new ApiError(404, 'NOT_FOUND', 'Invite not found');
+    }
+    return { success: true };
+  },
 };

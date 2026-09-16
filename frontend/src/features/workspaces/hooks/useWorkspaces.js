@@ -27,8 +27,13 @@ export const useWorkspaceMembers = (workspaceId, page) => {
 };
 
 export const useInviteMember = (workspaceId) => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data) => workspacesApi.inviteMember(workspaceId, data),
+    onSuccess: () => {
+      // Refresh pending invites list so new invite appears immediately
+      queryClient.invalidateQueries({ queryKey: ['workspaces', workspaceId, 'invites'] });
+    },
   });
 };
 
@@ -57,6 +62,24 @@ export const useUpdateMemberRole = (workspaceId) => {
     mutationFn: ({ userId, role }) => workspacesApi.updateMemberRole(workspaceId, userId, role),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workspaces', workspaceId, 'members'] });
+    },
+  });
+};
+
+export const usePendingInvites = (workspaceId) => {
+  return useQuery({
+    queryKey: ['workspaces', workspaceId, 'invites'],
+    queryFn: () => workspacesApi.getPendingInvites(workspaceId),
+    enabled: !!workspaceId,
+  });
+};
+
+export const useCancelInvite = (workspaceId) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (inviteId) => workspacesApi.cancelInvite(workspaceId, inviteId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workspaces', workspaceId, 'invites'] });
     },
   });
 };

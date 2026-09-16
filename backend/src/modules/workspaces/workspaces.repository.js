@@ -122,6 +122,21 @@ export const workspacesRepository = {
     await db.delete(workspaceInvites).where(eq(workspaceInvites.id, id));
   },
 
+  async getPendingInvites(workspaceId) {
+    return await db.select()
+      .from(workspaceInvites)
+      .where(eq(workspaceInvites.workspaceId, workspaceId))
+      .orderBy(desc(workspaceInvites.createdAt));
+  },
+
+  async deleteInviteById(inviteId, workspaceId) {
+    // Scoped to workspaceId to prevent cross-workspace deletion
+    const [deleted] = await db.delete(workspaceInvites)
+      .where(and(eq(workspaceInvites.id, inviteId), eq(workspaceInvites.workspaceId, workspaceId)))
+      .returning();
+    return deleted;
+  },
+
   async addMember(workspaceId, userId, role) {
     const [member] = await db.insert(workspaceMembers).values({
       workspaceId,

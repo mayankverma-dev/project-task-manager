@@ -29,5 +29,13 @@ export const workspacesApi = {
   updateMemberRole: async (workspaceId, userId, role) => {
     const res = await axiosInstance.patch(`/workspaces/${workspaceId}/members/${userId}`, { role });
     return res.data.data;
-  }
+  },
+  getPendingInvites: async (workspaceId) => {
+    const res = await axiosInstance.get(`/workspaces/${workspaceId}/invites`);
+    return res.data.data;
+  },
+  cancelInvite: async (workspaceId, inviteId) => {
+    const res = await axiosInstance.delete(`/workspaces/${workspaceId}/invites/${inviteId}`);
+    return res.data.data;
+  },
 };
