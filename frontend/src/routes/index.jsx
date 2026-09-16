@@ -1,10 +1,15 @@
 import { lazy, Suspense, useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, Outlet, Link, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { Loader2 } from 'lucide-react';
+import { Loader2, LayoutDashboard, Users as UsersIcon } from 'lucide-react';
 import { useAuthInit } from '../features/auth/hooks/useAuthInit.js';
 import { useWorkspaces } from '../features/workspaces/hooks/useWorkspaces.js';
 import { setActiveWorkspace } from '../features/workspaces/workspaceSlice.js';
+
+import { WorkspaceSwitcher } from '../features/workspaces/components/WorkspaceSwitcher.jsx';
+import { WorkspaceMembers } from '../features/workspaces/components/WorkspaceMembers.jsx';
+import { WorkspaceDashboard } from '../features/workspaces/components/WorkspaceDashboard.jsx';
+import { ProjectList } from '../features/projects/components/ProjectList.jsx';
 
 const LoginForm = lazy(() => import('../features/auth/components/LoginForm.jsx').then(m => ({ default: m.LoginForm })));
 const RegisterForm = lazy(() => import('../features/auth/components/RegisterForm.jsx').then(m => ({ default: m.RegisterForm })));
@@ -25,8 +30,9 @@ const LoadingFallback = () => (
   </div>
 );
 
-const AuthenticatedApp = ({ children }) => {
+const AuthenticatedApp = () => {
   const dispatch = useDispatch();
+  const location = useLocation();
   const { data: workspaces, isLoading, isError } = useWorkspaces();
   const activeWorkspace = useSelector(state => state.workspaces.activeWorkspace);
 
@@ -55,44 +61,42 @@ const AuthenticatedApp = ({ children }) => {
 
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* Sidebar will go here eventually */}
-      <main className="flex-1 overflow-auto">
-        {children}
-      </main>
-    </div>
-  );
-};
-
-import { WorkspaceSwitcher } from '../features/workspaces/components/WorkspaceSwitcher.jsx';
-import { WorkspaceMembers } from '../features/workspaces/components/WorkspaceMembers.jsx';
-import { ProjectList } from '../features/projects/components/ProjectList.jsx';
-
-// Placeholder Dashboard for now
-const Dashboard = () => {
-  const activeWorkspace = useSelector(state => state.workspaces.activeWorkspace);
-
-  return (
-    <div className="flex h-full">
-      <aside className="flex flex-col w-64 p-4 text-white bg-gray-800">
+      <aside className="flex flex-col w-64 p-4 text-white bg-gray-800 shrink-0">
         <div className="mb-8">
           <h2 className="mb-2 text-sm font-semibold tracking-wider text-gray-400 uppercase">Workspace</h2>
           <WorkspaceSwitcher />
         </div>
-        <nav className="flex-1">
-          {activeWorkspace && (
+        
+        {activeWorkspace && (
+          <nav className="flex-1 flex flex-col gap-1">
+            <Link 
+              to="/" 
+              className={`flex items-center px-3 py-2 rounded-md hover:bg-gray-700 ${location.pathname === '/' ? 'bg-gray-700 text-white' : 'text-gray-300'}`}
+            >
+              <LayoutDashboard className="w-4 h-4 mr-3" />
+              Dashboard
+            </Link>
+            <Link 
+              to="/members" 
+              className={`flex items-center px-3 py-2 rounded-md hover:bg-gray-700 ${location.pathname === '/members' ? 'bg-gray-700 text-white' : 'text-gray-300'}`}
+            >
+              <UsersIcon className="w-4 h-4 mr-3" />
+              Members
+            </Link>
+            
+            <div className="mt-6 mb-2 text-sm font-semibold tracking-wider text-gray-400 uppercase">Projects</div>
             <ProjectList workspaceId={activeWorkspace.id} />
-          )}
-        </nav>
+          </nav>
+        )}
       </aside>
-      <main className="flex-1 p-8 overflow-y-auto bg-gray-100">
-        <h1 className="mb-6 text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600">Welcome to Project Task Manager</p>
-
-        <WorkspaceMembers />
+      <main className="flex-1 overflow-auto bg-gray-100 relative">
+        <Outlet />
       </main>
     </div>
   );
 };
+
+// Dashboard component removed as it is now part of AuthenticatedApp layout
 
 export const AppRoutes = () => {
   const isInitialized = useAuthInit();
@@ -118,18 +122,16 @@ export const AppRoutes = () => {
 
         <Route path="/" element={
           <ProtectedRoute>
-            <AuthenticatedApp>
-              <Dashboard />
-            </AuthenticatedApp>
+            <AuthenticatedApp />
           </ProtectedRoute>
-        } />
-        <Route path="/workspaces/:workspaceId/projects/:projectId" element={
-          <ProtectedRoute>
-            <AuthenticatedApp>
-              <ProjectView />
-            </AuthenticatedApp>
-          </ProtectedRoute>
-        } />
+        }>
+          <Route index element={<WorkspaceDashboard />} />
+          <Route path="members" element={
+            <div className="p-8 max-w-6xl mx-auto w-full">
+              <WorkspaceMembers />
+            </div>
+          } /><Route path="workspaces/:workspaceId/projects/:projectId" element={<ProjectView />} />
+        </Route>
       </Routes>
     </Suspense>
   );

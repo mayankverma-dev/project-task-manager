@@ -18,6 +18,11 @@ export const workspacesController = {
     res.json(apiResponse(workspace));
   },
 
+  async getDashboardStats(req, res) {
+    const stats = await workspacesService.getDashboardStats(req.params.id);
+    res.json(apiResponse(stats));
+  },
+
   async inviteMember(req, res) {
     const invite = await workspacesService.inviteMember(req.params.id, req.body);
     // Returning the invite (and token) directly so we can simulate email flow in UI

@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import { workspacesRepository } from './workspaces.repository.js';
 import { authRepository } from '../auth/auth.repository.js';
 import { ApiError } from '../../utils/ApiError.js';
+import { getOrSetCache } from '../../utils/cache.js';
 
 export const workspacesService = {
   async createWorkspace(data, userId) {
@@ -145,5 +146,14 @@ export const workspacesService = {
     }
 
     return await workspacesRepository.updateMemberRole(workspaceId, targetUserId, newRole);
+  },
+
+  async getDashboardStats(workspaceId) {
+    const cacheKey = `cache:workspace:${workspaceId}:dashboard`;
+    const ttl = 60; // 60 seconds cache
+
+    return await getOrSetCache(cacheKey, ttl, async () => {
+      return await workspacesRepository.getDashboardStats(workspaceId);
+    });
   }
 };

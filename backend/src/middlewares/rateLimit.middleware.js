@@ -1,9 +1,7 @@
 import rateLimit from 'express-rate-limit';
 import RedisStore from 'rate-limit-redis';
-import Redis from 'ioredis';
+import { redisClient } from '../config/redis.js';
 import { ApiError } from '../utils/ApiError.js';
-
-const redisClient = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 
 const createRateLimiter = (options) => rateLimit({
   store: new RedisStore({

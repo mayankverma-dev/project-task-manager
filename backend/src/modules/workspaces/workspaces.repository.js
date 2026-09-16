@@ -1,6 +1,6 @@
 import { eq, and, desc, sql } from 'drizzle-orm';
 import { db } from '../../db/db.js';
-import { workspaces, workspaceMembers, workspaceInvites, users } from '../../db/schema/index.js';
+import { workspaces, workspaceMembers, workspaceInvites, users, projects, tasks } from '../../db/schema/index.js';
 
 export const workspacesRepository = {
   async createWorkspace(workspaceData, ownerId) {
@@ -129,5 +129,33 @@ export const workspacesRepository = {
       role,
     }).returning();
     return member;
+  },
+
+  async getDashboardStats(workspaceId) {
+    const memberCount = await db.select({ count: sql`count(*)` })
+      .from(workspaceMembers)
+      .where(eq(workspaceMembers.workspaceId, workspaceId));
+
+    const projectCount = await db.select({ count: sql`count(*)` })
+      .from(projects)
+      .where(eq(projects.workspaceId, workspaceId));
+
+    const tasksStats = await db.select({
+      status: tasks.status,
+      count: sql`count(*)`
+    })
+    .from(tasks)
+    .innerJoin(projects, eq(tasks.projectId, projects.id))
+    .where(eq(projects.workspaceId, workspaceId))
+    .groupBy(tasks.status);
+
+    return {
+      totalMembers: Number(memberCount[0].count),
+      totalProjects: Number(projectCount[0].count),
+      tasksByStatus: tasksStats.reduce((acc, curr) => {
+        acc[curr.status] = Number(curr.count);
+        return acc;
+      }, {}),
+    };
   }
 };

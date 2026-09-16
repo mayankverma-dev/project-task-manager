@@ -50,8 +50,8 @@ per the Definition of Done in `AGENT.md` — not partially.
 - [x] Frontend: filter `useReducer` (via search params), URL sync, `useInfiniteScroll`
 
 ### Phase 6 — Redis caching
-- [ ] Cache-aside on task list + dashboard reads
-- [ ] Invalidation wired to every mutation
+- [x] Cache-aside on task list + dashboard reads
+- [x] Invalidation wired to every mutation
 
 ### Phase 7 — Optimistic UI
 - [x] Drag-and-drop status change (optimistic + rollback)
@@ -86,14 +86,14 @@ per the Definition of Done in `AGENT.md` — not partially.
 
 ## Current Focus
 
-Phase 5 Pagination, Search, Filter, Sort is complete. We added cursor-based pagination and a GIN index on a `tsvector` generated column for task search. The frontend successfully implements filtering and search synchronized with the URL.
+Phase 6 Redis caching is complete. Implemented a `cache.js` utility, added the backend endpoint for dashboard statistics and wired cache invalidation to all task mutations (create, update, delete). Created a `WorkspaceDashboard` component on the frontend to visualize these stats.
 
 —
 
 ## Next Up
 
 _(What the next session should pick up first)_
-Phase 6 — Redis caching. We need to implement cache-aside on the task list and dashboard reads, and ensure invalidation is wired to every mutation.
+Phase 7 — Optimistic UI. We need to implement optimistic updates and rollbacks for comment creation. Drag-and-drop optimistic status changes are already partially implemented.
 
 —
 

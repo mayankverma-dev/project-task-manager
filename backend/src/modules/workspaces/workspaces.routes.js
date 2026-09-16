@@ -46,6 +46,13 @@ router.get(
   asyncHandler(workspacesController.getWorkspace)
 );
 
+// Get workspace dashboard stats
+router.get(
+  '/:id/dashboard',
+  requireRole('viewer'),
+  asyncHandler(workspacesController.getDashboardStats)
+);
+
 // Invite a member (requires admin role)
 router.post(
   '/:id/invite',
