@@ -3,7 +3,7 @@
 Update this file at the end of every session. This is the single source of truth for "what's done" and "why we did it this way." The agent must read this before doing anything else.
 
 **Last updated:** 2026-09-16
-**Current phase:** Phase 9 — Real-time layer
+**Current phase:** Phase 10 — Background jobs
 **Status:** Completed
 
 ---
@@ -68,8 +68,8 @@ per the Definition of Done in `AGENT.md` — not partially.
 - `[x]` Frontend `useWebSocket` hook pushing into query cache
 
 ### Phase 10 — Background jobs
-- [ ] BullMQ queue + separate worker process
-- [ ] Welcome email, digest, cleanup jobs
+- [x] BullMQ queue + separate worker process
+- [x] Welcome email, digest, cleanup jobs
 
 ### Phase 11 — Polish
 - [ ] Skeletons on every loading state
@@ -86,14 +86,14 @@ per the Definition of Done in `AGENT.md` — not partially.
 
 ## Current Focus
 
-Phase 9 (Real-time layer) is now complete. We implemented a WebSocket server with auth on connect, a Redis pub/sub relay, and a frontend `useWebSocket` hook triggering TanStack query invalidations for instant updates across clients.
+Phase 10 (Background jobs) is now complete. Implemented a BullMQ-backed job system running as a fully separate `worker.js` process. Created `emailQueue` (welcome emails + daily digest cron) and `cleanupQueue` (hourly expired record deletion). Integrated Nodemailer for real SMTP email sending (fail-open in dev). Wired `welcome_email` enqueue into `auth.service.register()`. Both repeatable cron schedulers (`digest-daily` @ 08:00 UTC, `cleanup-hourly`) registered via `upsertJobScheduler`.
 
 —
 
 ## Next Up
 
 _(What the next session should pick up first)_
-Phase 10 — Background jobs. We need to implement a BullMQ queue backed by Redis, running on a separate worker process (`worker.js`) to process jobs like welcome emails, digests, and idempotency key cleanup.
+Phase 11 — Polish pass. We need: shimmer skeletons on every loading state, lazy-loaded routes and heavy components (`React.lazy` + `Suspense`), sonner toasts on every mutation outcome, and throttled drag interactions.
 
 —
 
@@ -114,6 +114,11 @@ Phase 10 — Background jobs. We need to implement a BullMQ queue backed by Redi
 | 2026-09-16 | Optimistic UI Comments | Implemented a dedicated task details modal with a comments section relying on TanStack Query optimistic updates. |
 | 2026-09-16 | Rate Limit Key Generator | Modified `generalRateLimiter` to key by `req.user.id || req.ip` instead of just IP to comply with PRD per user limits. |
 | 2026-09-16 | Real-time Cache Invalidations | Instead of manual `setQueryData` array manipulations for cursor paginated queries on WebSocket events, opted for `invalidateQueries` to ensure cache safety and correctness while retaining instant "live" updates. |
+| 2026-09-16 | Dedicated IORedis connections for BullMQ | BullMQ prohibits sharing a Redis connection with cache/pub-sub. Created `src/config/bullmq.js` factory that produces a fresh `IORedis` instance (with `maxRetriesPerRequest: null`) per Queue/Worker. |
+| 2026-09-16 | Digest cron fans out from a single job | Instead of enqueuing per-user digest jobs, a single `notification_digest_cron` job queries all users with unread 24h notifications and sends each email sequentially. Avoids queue flooding. |
+| 2026-09-16 | Nodemailer fail-open in dev | If SMTP env vars are absent, `mailer.js` logs a warning and skips the send instead of throwing. Worker process never crashes due to missing email config. |
+| 2026-09-16 | welcome_email enqueue is best-effort | Wrapped `emailQueue.add()` in try/catch in `auth.service.register()` so a Redis outage never surfaces as a 500 on the register endpoint. |
+| 2026-09-16 | Workspace invite email via BullMQ | Added `workspace_invite_email` job to emailWorker. `workspacesService.inviteMember()` now enqueues the job (best-effort) after creating the DB invite. Controller no longer returns the raw token — invite link is delivered via real email. |
 
 ## Known Issues / Notes for Next Session
 

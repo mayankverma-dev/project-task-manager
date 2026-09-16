@@ -24,9 +24,18 @@ export const workspacesController = {
   },
 
   async inviteMember(req, res) {
-    const invite = await workspacesService.inviteMember(req.params.id, req.body);
-    // Returning the invite (and token) directly so we can simulate email flow in UI
-    res.status(201).json(apiResponse({ inviteUrl: `/accept-invite?token=${invite.token}`, invite }));
+    const invite = await workspacesService.inviteMember(
+      req.params.id,
+      req.body,
+      req.user.userId  // inviterId — used to look up inviter name for the email
+    );
+    // Return only non-sensitive invite metadata. The invite link is delivered via email.
+    res.status(201).json(apiResponse({
+      id: invite.id,
+      email: invite.email,
+      role: invite.role,
+      expiresAt: invite.expiresAt,
+    }));
   },
 
   async getInviteDetails(req, res) {

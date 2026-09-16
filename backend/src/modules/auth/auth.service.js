@@ -3,6 +3,8 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { authRepository } from './auth.repository.js';
 import { ApiError } from '../../utils/ApiError.js';
+import { logger } from '../../utils/logger.js';
+import { emailQueue } from '../../jobs/queue.js';
 
 const generateTokens = async (user, ip, userAgent) => {
   // Access Token
@@ -44,6 +46,18 @@ export const authService = {
       email: data.email,
       passwordHash,
     });
+
+    // Enqueue welcome email — best-effort, never fails the register response
+    try {
+      await emailQueue.add(
+        'welcome_email',
+        { userId: user.id, name: user.name, email: user.email },
+        { attempts: 3, backoff: { type: 'exponential', delay: 5000 } }
+      );
+      logger.info({ userId: user.id }, 'welcome_email job enqueued');
+    } catch (queueErr) {
+      logger.warn({ err: queueErr, userId: user.id }, 'Failed to enqueue welcome_email — continuing without email');
+    }
 
     const { passwordHash: _, ...userWithoutPassword } = user;
     return userWithoutPassword;

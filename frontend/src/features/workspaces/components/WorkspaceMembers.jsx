@@ -26,12 +26,12 @@ export const WorkspaceMembers = () => {
     defaultValues: { role: 'member' }
   });
 
-  const onInvite = async (data) => {
+  const onInvite = async (formData) => {
     try {
-      const res = await inviteMutation.mutateAsync(data);
-      toast.success('Invite created!');
-      // In a real app we wouldn't show this, but for dev:
-      toast.info(`Invite Link: ${res.inviteUrl}`, { duration: 10000 });
+      const res = await inviteMutation.mutateAsync(formData);
+      toast.success(`Invite email sent to ${res?.data?.email ?? formData.email}!`, {
+        description: `They'll receive an email with a link to join as ${formData.role}.`,
+      });
       reset();
     } catch (error) {
       toast.error(error.response?.data?.error?.message || 'Failed to send invite');

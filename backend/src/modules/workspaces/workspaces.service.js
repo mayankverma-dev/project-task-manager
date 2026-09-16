@@ -3,6 +3,8 @@ import { workspacesRepository } from './workspaces.repository.js';
 import { authRepository } from '../auth/auth.repository.js';
 import { ApiError } from '../../utils/ApiError.js';
 import { getOrSetCache } from '../../utils/cache.js';
+import { logger } from '../../utils/logger.js';
+import { emailQueue } from '../../jobs/queue.js';
 
 export const workspacesService = {
   async createWorkspace(data, userId) {
@@ -31,7 +33,7 @@ export const workspacesService = {
     return workspace;
   },
 
-  async inviteMember(workspaceId, inviteData) {
+  async inviteMember(workspaceId, inviteData, inviterId) {
     // Check if user is already a member
     const targetUser = await authRepository.getUserByEmail(inviteData.email);
     if (targetUser) {
@@ -60,8 +62,35 @@ export const workspacesService = {
       expiresAt,
     });
 
-    // In a real app we would send an email here using BullMQ
-    // For now we return the token so the frontend can display it in dev mode
+    // Enqueue invite email via BullMQ — best-effort, never fails the invite response
+    try {
+      // Fetch workspace name and inviter name for the email
+      const [workspace, inviter] = await Promise.all([
+        workspacesRepository.getWorkspaceById(workspaceId),
+        authRepository.getUserById(inviterId),
+      ]);
+
+      await emailQueue.add(
+        'workspace_invite_email',
+        {
+          email: inviteData.email,
+          inviteeName: targetUser?.name ?? null, // null if invitee is not yet registered
+          inviterName: inviter?.name ?? 'A team member',
+          workspaceName: workspace?.name ?? 'a workspace',
+          role: inviteData.role,
+          token,
+        },
+        { attempts: 3, backoff: { type: 'exponential', delay: 5000 } }
+      );
+
+      logger.info({ workspaceId, inviteeEmail: inviteData.email }, 'workspace_invite_email job enqueued');
+    } catch (queueErr) {
+      logger.warn(
+        { err: queueErr, workspaceId, inviteeEmail: inviteData.email },
+        'Failed to enqueue workspace_invite_email — continuing without email'
+      );
+    }
+
     return invite;
   },
 
