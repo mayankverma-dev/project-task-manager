@@ -3,7 +3,7 @@
 Update this file at the end of every session. This is the single source of truth for "what's done" and "why we did it this way." The agent must read this before doing anything else.
 
 **Last updated:** 2026-09-16
-**Current phase:** Phase 10 — Background jobs
+**Current phase:** Phase 11 — Polish
 **Status:** Completed
 
 ---
@@ -72,10 +72,10 @@ per the Definition of Done in `AGENT.md` — not partially.
 - [x] Welcome email, digest, cleanup jobs
 
 ### Phase 11 — Polish
-- [ ] Skeletons on every loading state
-- [ ] Lazy loading on every route + heavy component
-- [ ] Sonner toast on every mutation outcome
-- [ ] Throttled drag interactions
+- [x] Skeletons on every loading state
+- [x] Lazy loading on every route + heavy component
+- [x] Sonner toast on every mutation outcome
+- [x] Throttled drag interactions
 
 ### Phase 12 — Tests
 - [ ] Service/repository unit tests (Vitest)
@@ -86,14 +86,14 @@ per the Definition of Done in `AGENT.md` — not partially.
 
 ## Current Focus
 
-Phase 10 (Background jobs) is now complete. Implemented a BullMQ-backed job system running as a fully separate `worker.js` process. Created `emailQueue` (welcome emails + daily digest cron) and `cleanupQueue` (hourly expired record deletion). Integrated Nodemailer for real SMTP email sending (fail-open in dev). Wired `welcome_email` enqueue into `auth.service.register()`. Both repeatable cron schedulers (`digest-daily` @ 08:00 UTC, `cleanup-hourly`) registered via `upsertJobScheduler`.
+Phase 11 (Polish) is now complete. Built and wired shimmer skeleton components (`TaskCardSkeleton`, `CommentSkeleton`, `KanbanBoardSkeleton`, `MemberRowSkeleton`, `DashboardStatSkeleton`, `ProjectListSkeleton`) plus a two-pane `PageLoadingSkeleton` route fallback. Converted `WorkspaceDashboard` and `WorkspaceMembers` to `React.lazy()` — the build now emits 7 separate lazy chunks. Added `useThrottle` + `useThrottledCallback` hook from scratch; wired into `KanbanBoard.onDragEnd` at 300ms. Added missing sonner toasts to `useOptimisticTaskUpdate` (success + error), `useCreateComment` (success), and confirmed `AcceptInviteScreen` already covered. Build passes cleanly: 2100 modules, 0 errors.
 
 —
 
 ## Next Up
 
 _(What the next session should pick up first)_
-Phase 11 — Polish pass. We need: shimmer skeletons on every loading state, lazy-loaded routes and heavy components (`React.lazy` + `Suspense`), sonner toasts on every mutation outcome, and throttled drag interactions.
+Phase 12 — Tests. Vitest unit tests for services/repositories, Supertest integration tests for auth/RBAC/idempotency, React Testing Library tests for the optimistic-update flows.
 
 —
 
@@ -119,6 +119,10 @@ Phase 11 — Polish pass. We need: shimmer skeletons on every loading state, laz
 | 2026-09-16 | Nodemailer fail-open in dev | If SMTP env vars are absent, `mailer.js` logs a warning and skips the send instead of throwing. Worker process never crashes due to missing email config. |
 | 2026-09-16 | welcome_email enqueue is best-effort | Wrapped `emailQueue.add()` in try/catch in `auth.service.register()` so a Redis outage never surfaces as a 500 on the register endpoint. |
 | 2026-09-16 | Workspace invite email via BullMQ | Added `workspace_invite_email` job to emailWorker. `workspacesService.inviteMember()` now enqueues the job (best-effort) after creating the DB invite. Controller no longer returns the raw token — invite link is delivered via real email. |
+| 2026-09-16 | Local Skeleton primitive instead of shadcn | `src/components/ui/` didn't exist and shadcn's Skeleton isn't in package.json. Created a minimal local `Skeleton` base component matching the shadcn pattern; avoids installing a full shadcn setup just for one primitive. |
+| 2026-09-16 | useThrottledCallback leading-edge only | For drag-and-drop, leading-edge throttle gives instant feedback on the first drop; subsequent drops within 300ms are dropped. Trailing-edge would delay the visual confirmation unnecessarily. |
+| 2026-09-16 | WorkspaceDashboard + WorkspaceMembers converted to lazy | These were the only two route-level components still eagerly imported. Build now emits 7 separate lazy chunks. WelcomeScreen already lazy from a prior session. |
+| 2026-09-16 | useOptimisticTaskUpdate toast is low-noise | Success toast is brief ("Task updated.") rather than verbose. Drag-and-drop happens frequently; a long toast would be distracting. Error toast is explicit ("Failed to move task — changes rolled back.") so users understand the rollback. |
 
 ## Known Issues / Notes for Next Session
 

@@ -78,6 +78,9 @@ export const useCreateComment = (taskId) => {
       queryClient.setQueryData(['tasks', taskId, 'comments'], context.previousComments);
       toast.error('Failed to post comment. Please try again.');
     },
+    onSuccess: () => {
+      toast.success('Comment posted.');
+    },
     onSettled: () => {
       // Always refetch after error or success to ensure backend state
       queryClient.invalidateQueries({ queryKey: ['tasks', taskId, 'comments'] });

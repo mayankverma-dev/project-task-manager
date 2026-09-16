@@ -9,15 +9,16 @@ import { WebSocketProvider } from '../context/WebSocketContext.jsx';
 import { useRealTimeUpdates } from '../hooks/useRealTimeUpdates.js';
 
 import { WorkspaceSwitcher } from '../features/workspaces/components/WorkspaceSwitcher.jsx';
-import { WorkspaceMembers } from '../features/workspaces/components/WorkspaceMembers.jsx';
-import { WorkspaceDashboard } from '../features/workspaces/components/WorkspaceDashboard.jsx';
 import { ProjectList } from '../features/projects/components/ProjectList.jsx';
+import { PageLoadingSkeleton } from '../components/PageLoadingSkeleton.jsx';
 
 const LoginForm = lazy(() => import('../features/auth/components/LoginForm.jsx').then(m => ({ default: m.LoginForm })));
 const RegisterForm = lazy(() => import('../features/auth/components/RegisterForm.jsx').then(m => ({ default: m.RegisterForm })));
 const WelcomeScreen = lazy(() => import('../features/workspaces/components/WelcomeScreen.jsx').then(m => ({ default: m.WelcomeScreen })));
 const AcceptInviteScreen = lazy(() => import('../features/workspaces/components/AcceptInviteScreen.jsx').then(m => ({ default: m.AcceptInviteScreen })));
 const ProjectView = lazy(() => import('../features/projects/components/ProjectView.jsx').then(m => ({ default: m.ProjectView })));
+const WorkspaceDashboard = lazy(() => import('../features/workspaces/components/WorkspaceDashboard.jsx').then(m => ({ default: m.WorkspaceDashboard })));
+const WorkspaceMembers = lazy(() => import('../features/workspaces/components/WorkspaceMembers.jsx').then(m => ({ default: m.WorkspaceMembers })));
 const ProtectedRoute = ({ children }) => {
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   if (!isAuthenticated) {
@@ -113,7 +114,7 @@ export const AppRoutes = () => {
   }
 
   return (
-    <Suspense fallback={<LoadingFallback />}>
+    <Suspense fallback={<PageLoadingSkeleton />}>
       <Routes>
         <Route path="/login" element={
           <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 items-center">

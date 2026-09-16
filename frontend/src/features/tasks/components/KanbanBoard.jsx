@@ -3,6 +3,7 @@ import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 import { TaskCard } from './TaskCard';
 import { useOptimisticTaskUpdate } from '../hooks/useOptimisticTaskUpdate';
 import { TaskDetailsModal } from './TaskDetailsModal';
+import { useThrottledCallback } from '../../../hooks/useThrottle';
 
 const COLUMNS = [
   { id: 'todo', title: 'To Do' },
@@ -14,6 +15,12 @@ const COLUMNS = [
 export const KanbanBoard = ({ projectId, tasks = [] }) => {
   const { mutate: updateTask } = useOptimisticTaskUpdate();
   const [selectedTask, setSelectedTask] = useState(null);
+
+  // Throttle the network call to at most once per 300ms.
+  // Local UI updates instantly on every drop via onMutate — only the
+  // PATCH request is throttled here so rapid sequential drops don't
+  // flood the server.
+  const throttledUpdateTask = useThrottledCallback(updateTask, 300);
 
   const groupedTasks = useMemo(() => {
     const groups = { todo: [], in_progress: [], in_review: [], done: [] };
@@ -60,7 +67,7 @@ export const KanbanBoard = ({ projectId, tasks = [] }) => {
     }
 
     // Call API (Optimistic update runs under the hood)
-    updateTask({
+    throttledUpdateTask({
       projectId,
       taskId: draggableId,
       data: { status: newStatus, position: newPosition }

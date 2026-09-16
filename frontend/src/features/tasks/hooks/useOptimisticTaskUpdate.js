@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { tasksApi } from '../../../api/tasks.api';
+import { toast } from 'sonner';
 
 export const useOptimisticTaskUpdate = () => {
   const queryClient = useQueryClient();
@@ -36,6 +37,10 @@ export const useOptimisticTaskUpdate = () => {
       context.previousTasks.forEach(([queryKey, data]) => {
         queryClient.setQueryData(queryKey, data);
       });
+      toast.error('Failed to move task — changes rolled back.');
+    },
+    onSuccess: () => {
+      toast.success('Task updated.');
     },
     // Always refetch after error or success to ensure server state is in sync
     onSettled: (data, error, variables) => {

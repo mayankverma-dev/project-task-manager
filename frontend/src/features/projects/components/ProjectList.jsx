@@ -3,13 +3,14 @@ import { useProjects } from '../hooks/useProjects';
 import { CreateProjectModal } from './CreateProjectModal';
 import { Link } from 'react-router-dom';
 import { FolderPlus, Folder } from 'lucide-react';
+import { ProjectListSkeleton } from './ProjectListSkeleton.jsx';
 
 export const ProjectList = ({ workspaceId }) => {
   const { data, isLoading, error } = useProjects(workspaceId);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   if (isLoading) {
-    return <div className="p-4 text-sm text-neutral-500">Loading projects...</div>;
+    return <ProjectListSkeleton count={3} />;
   }
 
   if (error) {

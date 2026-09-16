@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { X, Send, Trash2 } from 'lucide-react';
 import { useComments, useCreateComment, useDeleteComment } from '../hooks/useComments';
 import { useSelector } from 'react-redux';
+import { CommentSkeleton } from './CommentSkeleton.jsx';
 
 const commentSchema = z.object({
   body: z.string().min(1, 'Comment cannot be empty').max(5000),
@@ -103,17 +104,7 @@ export const TaskDetailsModal = ({ task, isOpen, onClose }) => {
             {/* Comments List */}
             <div className="space-y-4">
               {isLoading ? (
-                <div className="animate-pulse space-y-4">
-                  {[1, 2].map(i => (
-                    <div key={i} className="flex gap-3">
-                      <div className="w-8 h-8 bg-neutral-200 dark:bg-neutral-800 rounded-full" />
-                      <div className="flex-1 space-y-2">
-                        <div className="h-4 bg-neutral-200 dark:bg-neutral-800 rounded w-1/4" />
-                        <div className="h-12 bg-neutral-200 dark:bg-neutral-800 rounded w-full" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <CommentSkeleton count={2} />
               ) : comments.length === 0 ? (
                 <p className="text-sm text-neutral-500 dark:text-neutral-400 text-center py-4">No comments yet.</p>
               ) : (

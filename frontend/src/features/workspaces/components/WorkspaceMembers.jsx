@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { toast } from 'sonner';
 import { useWorkspaceMembers, useInviteMember, useUpdateMemberRole } from '../hooks/useWorkspaces.js';
 import { usePermission } from '../hooks/usePermission.js';
+import { MemberRowSkeleton } from './MemberRowSkeleton.jsx';
 
 const inviteSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -85,11 +86,7 @@ export const WorkspaceMembers = () => {
       )}
 
       {isLoading ? (
-        <div className="animate-pulse space-y-4">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="h-12 bg-gray-100 rounded-md"></div>
-          ))}
-        </div>
+        <MemberRowSkeleton count={3} />
       ) : (
         <div className="overflow-hidden border border-gray-200 sm:rounded-lg">
           <table className="min-w-full divide-y divide-gray-200">

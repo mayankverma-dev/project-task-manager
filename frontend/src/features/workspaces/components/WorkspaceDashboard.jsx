@@ -2,6 +2,7 @@ import React from 'react';
 import { useWorkspaceDashboard } from '../hooks/useWorkspaceDashboard.js';
 import { useSelector } from 'react-redux';
 import { Users, Folder, CheckCircle, Clock, AlertCircle, Circle } from 'lucide-react';
+import { DashboardStatSkeleton } from './DashboardStatSkeleton.jsx';
 
 export const WorkspaceDashboard = () => {
   const activeWorkspace = useSelector(state => state.workspaces.activeWorkspace);
@@ -14,15 +15,9 @@ export const WorkspaceDashboard = () => {
   if (isLoading) {
     return (
       <div className="p-8">
-        <div className="h-8 mb-6 bg-gray-200 rounded w-48 animate-pulse"></div>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="p-6 bg-white rounded-lg shadow-sm border border-gray-100 h-32 animate-pulse">
-              <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
-              <div className="h-8 bg-gray-200 rounded w-1/4"></div>
-            </div>
-          ))}
-        </div>
+        <div className="h-8 mb-6 bg-neutral-200 dark:bg-neutral-800 animate-pulse rounded w-48" />
+        {/* 2 overview cards + 4 status cards = 6 total */}
+        <DashboardStatSkeleton count={6} />
       </div>
     );
   }

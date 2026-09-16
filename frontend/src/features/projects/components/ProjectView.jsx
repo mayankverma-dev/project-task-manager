@@ -7,6 +7,7 @@ import { CreateTaskModal } from '../../tasks/components/CreateTaskModal';
 import { useTaskFilters } from '../../tasks/hooks/useTaskFilters';
 import { TaskFilters } from '../../tasks/components/TaskFilters';
 import { Plus } from 'lucide-react';
+import { KanbanBoardSkeleton } from '../../tasks/components/KanbanBoardSkeleton.jsx';
 
 export const ProjectView = () => {
   const { workspaceId, projectId } = useParams();
@@ -17,7 +18,19 @@ export const ProjectView = () => {
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
 
   if (isLoadingProject || isLoadingTasks) {
-    return <div className="p-8 text-neutral-500">Loading project data...</div>;
+    return (
+      <div className="flex flex-col h-full bg-white dark:bg-neutral-950">
+        {/* Header shimmer */}
+        <div className="flex items-center justify-between p-6 border-b dark:border-neutral-800">
+          <div className="flex flex-col gap-2">
+            <div className="h-8 w-48 bg-neutral-200 dark:bg-neutral-800 animate-pulse rounded" />
+            <div className="h-4 w-72 bg-neutral-200 dark:bg-neutral-800 animate-pulse rounded" />
+          </div>
+          <div className="h-9 w-28 bg-neutral-200 dark:bg-neutral-800 animate-pulse rounded-md" />
+        </div>
+        <KanbanBoardSkeleton />
+      </div>
+    );
   }
 
   const project = projectResponse?.data;
