@@ -83,3 +83,13 @@ export const useCancelInvite = (workspaceId) => {
     },
   });
 };
+
+export const useRemoveMember = (workspaceId) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (userId) => workspacesApi.removeMember(workspaceId, userId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workspaces', workspaceId, 'members'] });
+    },
+  });
+};

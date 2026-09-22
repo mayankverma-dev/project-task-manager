@@ -206,4 +206,26 @@ export const workspacesService = {
     }
     return { success: true };
   },
+
+  async removeMember(workspaceId, targetUserId, requesterId, requesterRole) {
+    const targetMember = await workspacesRepository.getMember(workspaceId, targetUserId);
+    if (!targetMember) {
+      throw new ApiError(404, 'NOT_FOUND', 'Member not found');
+    }
+
+    // The workspace owner can never be removed
+    if (targetMember.role === 'owner') {
+      throw new ApiError(403, 'FORBIDDEN', 'The workspace owner cannot be removed');
+    }
+
+    const isSelf = targetUserId === requesterId;
+
+    // Members can only remove themselves; only admins/owners can remove others
+    if (!isSelf && requesterRole !== 'admin' && requesterRole !== 'owner') {
+      throw new ApiError(403, 'FORBIDDEN', 'You do not have permission to remove this member');
+    }
+
+    await workspacesRepository.removeMember(workspaceId, targetUserId);
+    return { success: true };
+  },
 };

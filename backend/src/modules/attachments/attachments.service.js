@@ -3,7 +3,7 @@ import { tasksRepository } from '../tasks/tasks.repository.js';
 import { projectsRepository } from '../projects/projects.repository.js';
 import { ApiError } from '../../utils/ApiError.js';
 import { emitToWorkspace } from '../../sockets/index.js';
-import fs from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
 
 export const attachmentsService = {
@@ -12,7 +12,7 @@ export const attachmentsService = {
     if (!task) {
       // Clean up uploaded file if task not found
       if (file && file.path) {
-        fs.unlinkSync(file.path);
+        await fs.unlink(file.path).catch(() => {});
       }
       throw new ApiError(404, 'NOT_FOUND', 'Task not found');
     }
@@ -51,12 +51,14 @@ export const attachmentsService = {
       throw new ApiError(403, 'FORBIDDEN', 'Not authorized to delete this attachment');
     }
     
-    // Delete file from disk
+    // Delete file from disk asynchronously — ignore ENOENT (file already gone)
     const filename = attachment.url.split('/').pop();
     const filePath = path.join(process.cwd(), 'uploads', filename);
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
+    await fs.unlink(filePath).catch((err) => {
+      if (err.code !== 'ENOENT') {
+        throw err; // Re-throw unexpected errors
+      }
+    });
 
     await attachmentsRepository.delete(id);
     
@@ -69,3 +71,4 @@ export const attachmentsService = {
     }
   }
 };
+

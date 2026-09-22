@@ -75,4 +75,14 @@ export const workspacesController = {
     const result = await workspacesService.cancelInvite(req.params.id, req.params.inviteId);
     res.json(apiResponse(result));
   },
+
+  async removeMember(req, res) {
+    const result = await workspacesService.removeMember(
+      req.params.id,
+      req.params.userId,
+      req.user.userId,  // requesterId — allows self-removal (leave)
+      req.userRole      // set by requireRole middleware
+    );
+    res.json(apiResponse(result));
+  },
 };

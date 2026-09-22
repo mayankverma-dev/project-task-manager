@@ -29,7 +29,7 @@ export const projectsRepository = {
   async update(id, data) {
     const [project] = await db
       .update(projects)
-      .set({ ...data })
+      .set({ ...data, updatedAt: new Date() })
       .where(eq(projects.id, id))
       .returning();
     return project;

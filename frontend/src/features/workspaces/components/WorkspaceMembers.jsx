@@ -10,6 +10,7 @@ import {
   useUpdateMemberRole,
   usePendingInvites,
   useCancelInvite,
+  useRemoveMember,
 } from '../hooks/useWorkspaces.js';
 import { usePermission } from '../hooks/usePermission.js';
 import { MemberRowSkeleton } from './MemberRowSkeleton.jsx';
@@ -24,6 +25,7 @@ export const WorkspaceMembers = () => {
   const { canManageMembers } = usePermission();
   const [page, setPage] = useState(1);
   const [cancellingId, setCancellingId] = useState(null);
+  const [removingId, setRemovingId] = useState(null);
   
   const { data, isLoading } = useWorkspaceMembers(activeWorkspace?.id, page);
   const { data: pendingInvites, isLoading: invitesLoading } = usePendingInvites(
@@ -32,6 +34,7 @@ export const WorkspaceMembers = () => {
   const inviteMutation = useInviteMember(activeWorkspace?.id);
   const updateRoleMutation = useUpdateMemberRole(activeWorkspace?.id);
   const cancelInviteMutation = useCancelInvite(activeWorkspace?.id);
+  const removeMemberMutation = useRemoveMember(activeWorkspace?.id);
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm({
     resolver: zodResolver(inviteSchema),
@@ -68,6 +71,19 @@ export const WorkspaceMembers = () => {
       toast.error(error.response?.data?.error?.message || 'Failed to cancel invite');
     } finally {
       setCancellingId(null);
+    }
+  };
+
+  const handleRemoveMember = async (userId, email) => {
+    if (!window.confirm(`Are you sure you want to remove ${email} from the workspace?`)) return;
+    setRemovingId(userId);
+    try {
+      await removeMemberMutation.mutateAsync(userId);
+      toast.success(`Member ${email} removed`);
+    } catch (error) {
+      toast.error(error.response?.data?.error?.message || 'Failed to remove member');
+    } finally {
+      setRemovingId(null);
     }
   };
 
@@ -120,6 +136,9 @@ export const WorkspaceMembers = () => {
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
+                {canManageMembers && (
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                )}
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -152,6 +171,19 @@ export const WorkspaceMembers = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {new Date(member.joinedAt).toLocaleDateString()}
                   </td>
+                  {canManageMembers && (
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {member.role !== 'owner' && (
+                        <button
+                          onClick={() => handleRemoveMember(member.userId, member.user.email)}
+                          disabled={removingId === member.userId}
+                          className="text-sm text-red-600 hover:text-red-800 disabled:opacity-50 font-medium"
+                        >
+                          {removingId === member.userId ? 'Removing…' : 'Remove'}
+                        </button>
+                      )}
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

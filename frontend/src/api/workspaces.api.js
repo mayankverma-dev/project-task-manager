@@ -38,4 +38,8 @@ export const workspacesApi = {
     const res = await axiosInstance.delete(`/workspaces/${workspaceId}/invites/${inviteId}`);
     return res.data.data;
   },
+  removeMember: async (workspaceId, userId) => {
+    const res = await axiosInstance.delete(`/workspaces/${workspaceId}/members/${userId}`);
+    return res.data.data;
+  },
 };

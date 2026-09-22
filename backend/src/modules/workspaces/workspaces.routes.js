@@ -77,6 +77,13 @@ router.patch(
   asyncHandler(workspacesController.updateMemberRole)
 );
 
+// Remove a member / leave a workspace (any member can leave; service enforces admin check for removing others)
+router.delete(
+  '/:id/members/:userId',
+  requireRole('member'),
+  asyncHandler(workspacesController.removeMember)
+);
+
 // Get pending invites for a workspace (requires admin role)
 router.get(
   '/:id/invites',

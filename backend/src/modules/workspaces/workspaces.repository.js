@@ -1,4 +1,4 @@
-import { eq, and, desc, sql } from 'drizzle-orm';
+import { eq, and, desc, sql, inArray } from 'drizzle-orm';
 import { db } from '../../db/db.js';
 import { workspaces, workspaceMembers, workspaceInvites, users, projects, tasks } from '../../db/schema/index.js';
 
@@ -144,6 +144,26 @@ export const workspacesRepository = {
       role,
     }).returning();
     return member;
+  },
+
+  async removeMember(workspaceId, userId) {
+    return await db.transaction(async (tx) => {
+      const workspaceProjects = await tx.select({ id: projects.id }).from(projects).where(eq(projects.workspaceId, workspaceId));
+      const projectIds = workspaceProjects.map(p => p.id);
+      
+      if (projectIds.length > 0) {
+        await tx.update(tasks)
+          .set({ assigneeId: null })
+          .where(and(inArray(tasks.projectId, projectIds), eq(tasks.assigneeId, userId)));
+      }
+
+      const [deleted] = await tx
+        .delete(workspaceMembers)
+        .where(and(eq(workspaceMembers.workspaceId, workspaceId), eq(workspaceMembers.userId, userId)))
+        .returning();
+      
+      return deleted;
+    });
   },
 
   async getDashboardStats(workspaceId) {

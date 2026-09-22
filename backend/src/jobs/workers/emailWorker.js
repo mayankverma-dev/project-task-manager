@@ -1,5 +1,5 @@
 import { Worker } from 'bullmq';
-import { eq, isNull, gte } from 'drizzle-orm';
+import { and, eq, isNull, gte } from 'drizzle-orm';
 import { createBullMQConnection } from '../../config/bullmq.js';
 import { sendMail } from '../../utils/mailer.js';
 import { logger } from '../../utils/logger.js';
@@ -238,8 +238,7 @@ const processEmailJob = async (job) => {
       .innerJoin(users, eq(notifications.userId, users.id))
       .where(
         // unread (readAt IS NULL) AND created within last 24h
-        // Drizzle: combine two conditions with `and()` — use sql template for AND logic
-        isNull(notifications.readAt) && gte(notifications.createdAt, since)
+        and(isNull(notifications.readAt), gte(notifications.createdAt, since))
       );
 
     if (rows.length === 0) {

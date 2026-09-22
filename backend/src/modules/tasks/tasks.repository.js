@@ -32,8 +32,7 @@ export const tasksRepository = {
         createdByEmail: users.email
       })
       .from(tasks)
-      .leftJoin(users, eq(tasks.createdBy, users.id))
-      .where(eq(tasks.projectId, projectId));
+      .leftJoin(users, eq(tasks.createdBy, users.id));
     const conditions = [eq(tasks.projectId, projectId)];
 
     if (search) {
