@@ -1,15 +1,12 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { Routes, Route, Navigate, Outlet, Link, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { Loader2, LayoutDashboard, Users as UsersIcon, LogOut } from 'lucide-react';
+import { Loader2, LayoutDashboard, Users as UsersIcon } from 'lucide-react';
 import { useAuthInit } from '../features/auth/hooks/useAuthInit.js';
 import { useWorkspaces } from '../features/workspaces/hooks/useWorkspaces.js';
 import { setActiveWorkspace } from '../features/workspaces/workspaceSlice.js';
 import { WebSocketProvider } from '../context/WebSocketContext.jsx';
 import { useRealTimeUpdates } from '../hooks/useRealTimeUpdates.js';
-import { logoutAction } from '../features/auth/authSlice.js';
-import { axiosInstance } from '../api/axiosInstance.js';
-import { queryClient } from '../app/queryClient.js';
 
 import { WorkspaceSwitcher } from '../features/workspaces/components/WorkspaceSwitcher.jsx';
 import { ProjectList } from '../features/projects/components/ProjectList.jsx';
@@ -47,17 +44,6 @@ const AuthenticatedApp = () => {
   const location = useLocation();
   const { data: workspaces, isLoading, isError } = useWorkspaces();
   const activeWorkspace = useSelector(state => state.workspaces.activeWorkspace);
-
-  const handleLogout = async () => {
-    try {
-      await axiosInstance.post('/auth/logout');
-    } catch (error) {
-      console.error('Logout error:', error);
-    } finally {
-      queryClient.clear();
-      dispatch(logoutAction());
-    }
-  };
 
   useEffect(() => {
     if (workspaces && workspaces.length > 0 && !activeWorkspace) {
@@ -114,15 +100,6 @@ const AuthenticatedApp = () => {
           </nav>
         )}
         
-        <div className="mt-auto pt-4 border-t border-gray-700">
-          <button 
-            onClick={handleLogout}
-            className="flex items-center w-full px-3 py-2 text-gray-300 rounded-md hover:bg-gray-700 hover:text-white transition-colors"
-          >
-            <LogOut className="w-4 h-4 mr-3" />
-            Logout
-          </button>
-        </div>
       </aside>
       <main className="flex-1 overflow-auto bg-gray-100 dark:bg-neutral-900 relative">
         <Topbar />
