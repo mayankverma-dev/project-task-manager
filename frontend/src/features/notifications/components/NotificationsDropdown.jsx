@@ -1,11 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Bell, Check, CheckCircle2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useNotifications, useMarkAsRead, useMarkAllAsRead } from '../hooks/useNotifications';
 import { NotificationSkeleton } from './NotificationSkeleton';
 
 export const NotificationsDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const navigate = useNavigate();
   
   const { data, isLoading, hasNextPage, fetchNextPage, isFetchingNextPage } = useNotifications();
   const { mutate: markAsRead } = useMarkAsRead();
@@ -23,14 +25,24 @@ export const NotificationsDropdown = () => {
   }, []);
 
   const notifications = data?.pages.flatMap(page => page.data) || [];
-  const unreadCount = notifications.filter(n => !n.isRead).length;
+  const unreadCount = notifications.filter(n => !n.readAt).length;
 
   const handleNotificationClick = (notification) => {
-    if (!notification.isRead) {
+    if (!notification.readAt) {
       markAsRead(notification.id);
     }
     setIsOpen(false);
-    // Ideally we would navigate here if there's an entity type
+    
+    if (notification.type === 'TASK_ASSIGNED' && notification.payload) {
+      const { workspaceId, projectId, taskId } = notification.payload;
+      if (workspaceId && projectId) {
+        let url = `/workspaces/${workspaceId}/projects/${projectId}`;
+        if (taskId) {
+          url += `?taskId=${taskId}`;
+        }
+        navigate(url);
+      }
+    }
   };
 
   return (
@@ -73,18 +85,22 @@ export const NotificationsDropdown = () => {
                   <div 
                     key={notification.id}
                     onClick={() => handleNotificationClick(notification)}
-                    className={`flex gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-neutral-800/50 transition-colors ${!notification.isRead ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}`}
+                    className={`flex gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-neutral-800/50 transition-colors ${!notification.readAt ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}`}
                   >
                     <div className="mt-1 shrink-0">
-                      {notification.isRead ? (
+                      {notification.readAt ? (
                         <Check className="w-4 h-4 text-gray-400" />
                       ) : (
                         <div className="w-2 h-2 mt-1 bg-blue-600 rounded-full" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className={`text-sm ${!notification.isRead ? 'font-medium text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-300'}`}>
-                        {notification.type === 'TASK_ASSIGNED' ? 'You were assigned to a task.' : notification.payload?.message || 'New notification received.'}
+                      <p className={`text-sm ${!notification.readAt ? 'font-medium text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-300'}`}>
+                        {notification.type === 'TASK_ASSIGNED' ? (
+                          <>You were assigned to task: <strong>{notification.payload?.taskTitle || 'Unknown Task'}</strong></>
+                        ) : (
+                          notification.payload?.message || 'New notification received.'
+                        )}
                       </p>
                       <p className="text-xs text-gray-500 mt-1">
                         {new Date(notification.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}

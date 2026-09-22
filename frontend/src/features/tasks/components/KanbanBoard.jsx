@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 import { TaskCard } from './TaskCard';
 import { useOptimisticTaskUpdate } from '../hooks/useOptimisticTaskUpdate';
@@ -15,6 +16,19 @@ const COLUMNS = [
 export const KanbanBoard = ({ projectId, workspaceId, tasks = [] }) => {
   const { mutate: updateTask } = useOptimisticTaskUpdate();
   const [selectedTask, setSelectedTask] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlTaskId = searchParams.get('taskId');
+
+  useEffect(() => {
+    if (urlTaskId && tasks.length > 0) {
+      const taskToOpen = tasks.find(t => t.id === urlTaskId);
+      if (taskToOpen) {
+        setSelectedTask(taskToOpen);
+        // Clear query params to prevent reopening if user closes modal
+        setSearchParams(new URLSearchParams());
+      }
+    }
+  }, [urlTaskId, tasks, setSearchParams]);
 
   // Throttle the network call to at most once per 300ms.
   // Local UI updates instantly on every drop via onMutate — only the

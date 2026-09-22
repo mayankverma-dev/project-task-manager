@@ -30,6 +30,7 @@ export const tasksService = {
           taskId: task.id,
           taskTitle: task.title,
           projectId: task.projectId,
+          workspaceId: project.workspaceId,
           assignedBy: userId
         }
       });
@@ -85,6 +86,7 @@ export const tasksService = {
           taskId: updatedTask.id,
           taskTitle: updatedTask.title,
           projectId: updatedTask.projectId,
+          workspaceId: project.workspaceId,
           assignedBy: userId
         }
       });
