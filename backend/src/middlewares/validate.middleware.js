@@ -14,7 +14,7 @@ export const validate = (schema) => (req, res, next) => {
     next();
   } catch (error) {
     if (error.name === 'ZodError') {
-      const details = error.errors.map(err => ({ field: err.path.join('.'), issue: err.message }));
+      const details = (error.issues || error.errors || []).map(err => ({ field: err.path.join('.'), issue: err.message }));
       next(new ApiError(400, 'VALIDATION_ERROR', 'Validation failed', details));
     } else {
       next(error);

@@ -10,7 +10,7 @@ export const createTaskSchema = z.object({
     status: z.enum(['todo', 'in_progress', 'in_review', 'done']).optional(),
     priority: z.enum(['low', 'medium', 'high', 'urgent']).optional(),
     assigneeId: z.string().uuid('Invalid assignee ID').optional(),
-    dueDate: z.string().datetime().optional(),
+    dueDate: z.coerce.date().optional(),
     position: z.number().optional(), // Used to position at start or end initially
   }),
 });
@@ -26,7 +26,7 @@ export const updateTaskSchema = z.object({
     status: z.enum(['todo', 'in_progress', 'in_review', 'done']).optional(),
     priority: z.enum(['low', 'medium', 'high', 'urgent']).optional(),
     assigneeId: z.string().uuid().optional(),
-    dueDate: z.string().datetime().optional(),
+    dueDate: z.coerce.date().optional(),
     position: z.number().optional(), // Optimistic UI drag-and-drop
   }),
 });
