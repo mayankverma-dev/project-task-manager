@@ -32,7 +32,35 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-app.use(pinoHttp({ logger }));
+app.use(pinoHttp({ 
+  logger,
+  customLogLevel: (req, res, err) => {
+    if (res.statusCode >= 400 && res.statusCode < 500) {
+      return 'warn';
+    } else if (res.statusCode >= 500 || err) {
+      return 'error';
+    }
+    return 'info';
+  },
+  customSuccessMessage: (req, res) => {
+    if (res.statusCode === 404) {
+      return `${req.method} ${req.originalUrl || req.url} - Not Found`;
+    }
+    return `${req.method} ${req.originalUrl || req.url} - ${res.statusCode}`;
+  },
+  customErrorMessage: (req, res, err) => {
+    return `${req.method} ${req.originalUrl || req.url} - ${res.statusCode} - ${err.message}`;
+  },
+  serializers: {
+    req: (req) => ({
+      method: req.method,
+      url: req.url,
+    }),
+    res: (res) => ({
+      statusCode: res.statusCode,
+    })
+  }
+}));
 
 // API Routes will be mounted here
 app.get('/api/v1/health', (req, res) => {
