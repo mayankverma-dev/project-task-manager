@@ -6,7 +6,8 @@ import { useTasks } from '../../tasks/hooks/useTasks';
 import { CreateTaskModal } from '../../tasks/components/CreateTaskModal';
 import { useTaskFilters } from '../../tasks/hooks/useTaskFilters';
 import { TaskFilters } from '../../tasks/components/TaskFilters';
-import { Plus } from 'lucide-react';
+import { Plus, Settings, Edit2, Trash2, MoreVertical } from 'lucide-react';
+import { ProjectSettingsModal } from './ProjectSettingsModal';
 import { KanbanBoardSkeleton } from '../../tasks/components/KanbanBoardSkeleton.jsx';
 
 export const ProjectView = () => {
@@ -16,6 +17,7 @@ export const ProjectView = () => {
   const { apiFilters } = useTaskFilters();
   const { data: tasksResponse, isLoading: isLoadingTasks, hasNextPage, fetchNextPage, isFetchingNextPage } = useTasks(projectId, apiFilters);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
   if (isLoadingProject || isLoadingTasks) {
     return (
@@ -49,19 +51,28 @@ export const ProjectView = () => {
             <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">{project.description}</p>
           )}
         </div>
-        <button
-          onClick={() => setIsTaskModalOpen(true)}
-          className="flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Create Task
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setIsSettingsModalOpen(true)}
+            className="p-2 text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-md transition-colors"
+            title="Project Settings"
+          >
+            <Settings className="w-5 h-5" />
+          </button>
+          <button
+            onClick={() => setIsTaskModalOpen(true)}
+            className="flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors shadow-sm"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Create Task
+          </button>
+        </div>
       </div>
 
       <TaskFilters />
 
       <div className="flex-1 overflow-hidden">
-        <KanbanBoard projectId={projectId} tasks={tasks} />
+        <KanbanBoard projectId={projectId} workspaceId={workspaceId} tasks={tasks} />
       </div>
 
       {hasNextPage && (
@@ -78,8 +89,16 @@ export const ProjectView = () => {
 
       <CreateTaskModal
         projectId={projectId}
+        workspaceId={workspaceId}
         isOpen={isTaskModalOpen}
         onClose={() => setIsTaskModalOpen(false)}
+      />
+
+      <ProjectSettingsModal 
+        project={project}
+        workspaceId={workspaceId}
+        isOpen={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
       />
     </div>
   );

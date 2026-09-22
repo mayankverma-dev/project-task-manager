@@ -3,6 +3,7 @@ import { tasksRepository } from './tasks.repository.js';
 import { ApiError } from '../../utils/ApiError.js';
 import { getOrSetCache, invalidateCache } from '../../utils/cache.js';
 import { projectsRepository } from '../projects/projects.repository.js';
+import { notificationsRepository } from '../notifications/notifications.repository.js';
 import { emitToWorkspace } from '../../sockets/index.js';
 
 export const tasksService = {
@@ -21,6 +22,19 @@ export const tasksService = {
       emitToWorkspace(project.workspaceId, 'task.created', { task });
     }
     
+    if (data.assigneeId) {
+      await notificationsRepository.createNotification({
+        userId: data.assigneeId,
+        type: 'TASK_ASSIGNED',
+        payload: {
+          taskId: task.id,
+          taskTitle: task.title,
+          projectId: task.projectId,
+          assignedBy: userId
+        }
+      });
+    }
+
     return task;
   },
 
@@ -48,7 +62,7 @@ export const tasksService = {
     return task;
   },
 
-  async updateTask(id, projectId, data) {
+  async updateTask(id, projectId, data, userId) {
     const task = await tasksRepository.findByIdAndProject(id, projectId);
     if (!task) {
       throw new ApiError(404, 'NOT_FOUND', 'Task not found');
@@ -61,6 +75,19 @@ export const tasksService = {
     const project = await projectsRepository.findById(projectId);
     if (project) {
       emitToWorkspace(project.workspaceId, 'task.updated', { task: updatedTask });
+    }
+    
+    if (data.assigneeId && data.assigneeId !== task.assigneeId && userId) {
+      await notificationsRepository.createNotification({
+        userId: data.assigneeId,
+        type: 'TASK_ASSIGNED',
+        payload: {
+          taskId: updatedTask.id,
+          taskTitle: updatedTask.title,
+          projectId: updatedTask.projectId,
+          assignedBy: userId
+        }
+      });
     }
     
     return updatedTask;

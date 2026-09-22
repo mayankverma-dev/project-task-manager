@@ -28,3 +28,28 @@ export const useCreateProject = () => {
     },
   });
 };
+
+export const useUpdateProject = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ workspaceId, projectId, data }) => 
+      projectsApi.update(workspaceId, projectId, data),
+    onSuccess: (response, { workspaceId, projectId }) => {
+      queryClient.invalidateQueries({ queryKey: ['projects', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['projects', workspaceId, projectId] });
+    },
+  });
+};
+
+export const useDeleteProject = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ workspaceId, projectId }) => 
+      projectsApi.delete(workspaceId, projectId),
+    onSuccess: (response, { workspaceId }) => {
+      queryClient.invalidateQueries({ queryKey: ['projects', workspaceId] });
+    },
+  });
+};

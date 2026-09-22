@@ -1,7 +1,10 @@
 import { db } from '../../db/db.js';
 import { tasks } from '../../db/schema/tasks.js';
 import { eq, and, sql, asc, desc, ilike, gt, lt, getTableColumns } from 'drizzle-orm';
+import { alias } from 'drizzle-orm/pg-core';
 import { users } from '../../db/schema/auth.js';
+
+const assigneeUser = alias(users, 'assigneeUser');
 
 export const tasksRepository = {
   async create(data) {
@@ -29,10 +32,13 @@ export const tasksRepository = {
         commentCount: sql`(SELECT COUNT(*)::int FROM comments WHERE comments.task_id = tasks.id)`.as('commentCount'),
         attachmentCount: sql`(SELECT COUNT(*)::int FROM attachments WHERE attachments.task_id = tasks.id)`.as('attachmentCount'),
         createdByName: users.name,
-        createdByEmail: users.email
+        createdByEmail: users.email,
+        assigneeName: assigneeUser.name,
+        assigneeEmail: assigneeUser.email
       })
       .from(tasks)
-      .leftJoin(users, eq(tasks.createdBy, users.id));
+      .leftJoin(users, eq(tasks.createdBy, users.id))
+      .leftJoin(assigneeUser, eq(tasks.assigneeId, assigneeUser.id));
     const conditions = [eq(tasks.projectId, projectId)];
 
     if (search) {
@@ -92,8 +98,16 @@ export const tasksRepository = {
 
   async findByIdAndProject(id, projectId) {
     const [task] = await db
-      .select()
+      .select({
+        ...getTableColumns(tasks),
+        createdByName: users.name,
+        createdByEmail: users.email,
+        assigneeName: assigneeUser.name,
+        assigneeEmail: assigneeUser.email
+      })
       .from(tasks)
+      .leftJoin(users, eq(tasks.createdBy, users.id))
+      .leftJoin(assigneeUser, eq(tasks.assigneeId, assigneeUser.id))
       .where(and(eq(tasks.id, id), eq(tasks.projectId, projectId)))
       .limit(1);
     return task;

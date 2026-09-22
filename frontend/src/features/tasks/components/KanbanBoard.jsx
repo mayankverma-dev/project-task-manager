@@ -12,7 +12,7 @@ const COLUMNS = [
   { id: 'done', title: 'Done' }
 ];
 
-export const KanbanBoard = ({ projectId, tasks = [] }) => {
+export const KanbanBoard = ({ projectId, workspaceId, tasks = [] }) => {
   const { mutate: updateTask } = useOptimisticTaskUpdate();
   const [selectedTask, setSelectedTask] = useState(null);
 
@@ -106,6 +106,7 @@ export const KanbanBoard = ({ projectId, tasks = [] }) => {
       </div>
       <TaskDetailsModal
         task={selectedTask}
+        workspaceId={workspaceId}
         isOpen={!!selectedTask}
         onClose={() => setSelectedTask(null)}
       />

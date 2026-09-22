@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import { useProjects } from '../hooks/useProjects';
 import { CreateProjectModal } from './CreateProjectModal';
-import { Link } from 'react-router-dom';
-import { FolderPlus, Folder } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { FolderPlus, Folder, Settings } from 'lucide-react';
 import { ProjectListSkeleton } from './ProjectListSkeleton.jsx';
+import { ProjectSettingsModal } from './ProjectSettingsModal';
 
 export const ProjectList = ({ workspaceId }) => {
   const { data, isLoading, error } = useProjects(workspaceId);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [settingsProject, setSettingsProject] = useState(null);
+  const navigate = useNavigate();
 
   if (isLoading) {
     return <ProjectListSkeleton count={3} />;
@@ -39,19 +42,32 @@ export const ProjectList = ({ workspaceId }) => {
           </div>
         ) : (
           projects.map((project) => (
-            <Link
+            <div
               key={project.id}
-              to={`/workspaces/${workspaceId}/projects/${project.id}`}
-              className="flex items-center p-3 transition-colors border rounded-lg hover:bg-neutral-50 dark:border-neutral-800 dark:hover:bg-neutral-800/50"
+              className="group flex items-center justify-between p-3 transition-colors border rounded-lg hover:bg-neutral-50 dark:border-neutral-800 dark:hover:bg-neutral-800/50"
             >
-              <Folder className="w-5 h-5 mr-3 text-neutral-400" />
-              <div>
-                <div className="font-medium text-neutral-900 dark:text-white">{project.name}</div>
-                {project.description && (
-                  <div className="text-xs text-neutral-500 truncate mt-0.5">{project.description}</div>
-                )}
+              <div 
+                className="flex items-center flex-1 cursor-pointer min-w-0"
+                onClick={() => navigate(`/workspaces/${workspaceId}/projects/${project.id}`)}
+              >
+                <Folder className="w-5 h-5 mr-3 text-neutral-400 shrink-0" />
+                <div className="min-w-0">
+                  <div className="font-medium text-neutral-900 dark:text-white truncate">{project.name}</div>
+                  {project.description && (
+                    <div className="text-xs text-neutral-500 truncate mt-0.5">{project.description}</div>
+                  )}
+                </div>
               </div>
-            </Link>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSettingsProject(project);
+                }}
+                className="p-1.5 opacity-0 group-hover:opacity-100 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-200 dark:hover:text-neutral-200 dark:hover:bg-neutral-700 rounded transition-all"
+              >
+                <Settings className="w-4 h-4" />
+              </button>
+            </div>
           ))
         )}
       </div>
@@ -60,6 +76,13 @@ export const ProjectList = ({ workspaceId }) => {
         workspaceId={workspaceId}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+      />
+
+      <ProjectSettingsModal
+        project={settingsProject}
+        workspaceId={workspaceId}
+        isOpen={!!settingsProject}
+        onClose={() => setSettingsProject(null)}
       />
     </div>
   );

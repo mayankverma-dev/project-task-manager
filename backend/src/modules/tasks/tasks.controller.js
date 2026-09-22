@@ -22,7 +22,7 @@ export const tasksController = {
 
   async update(req, res) {
     const { id, projectId } = req.params;
-    const task = await tasksService.updateTask(id, projectId, req.body);
+    const task = await tasksService.updateTask(id, projectId, req.body, req.user.id);
     return res.json(apiResponse(task));
   },
 
