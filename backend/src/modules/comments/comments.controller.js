@@ -17,12 +17,8 @@ export const commentsController = {
 
   async delete(req, res) {
     const { id, taskId } = req.params;
-    // req.userRole should be populated if requireRole middleware was used
-    // Wait, requireRole needs a workspaceId to figure out the role.
-    // Let's pass what we have, or fetch the user's role if needed.
-    // For now, assume req.userRole might not be set by requireRole if not used correctly,
-    // but we can just use req.user.role if it's there, or we'll let service handle it.
-    await commentsService.deleteComment(id, taskId, req.user.id, req.user.role);
+    // req.userRole is populated by requireRole middleware
+    await commentsService.deleteComment(id, taskId, req.user.id, req.userRole);
     res.status(204).send();
   }
 };

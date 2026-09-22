@@ -27,6 +27,7 @@ export const tasksRepository = {
       .select({
         ...getTableColumns(tasks),
         commentCount: sql`(SELECT COUNT(*)::int FROM comments WHERE comments.task_id = tasks.id)`.as('commentCount'),
+        attachmentCount: sql`(SELECT COUNT(*)::int FROM attachments WHERE attachments.task_id = tasks.id)`.as('attachmentCount'),
         createdByName: users.name,
         createdByEmail: users.email
       })

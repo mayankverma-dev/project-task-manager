@@ -11,9 +11,18 @@ import workspacesRoutes from './modules/workspaces/workspaces.routes.js';
 import projectsRoutes from './modules/projects/projects.routes.js';
 import tasksRoutes from './modules/tasks/tasks.routes.js';
 import commentsRoutes from './modules/comments/comments.routes.js';
+import attachmentsRoutes from './modules/attachments/attachments.routes.js';
+import notificationsRoutes from './modules/notifications/notifications.routes.js';
+import path from 'path';
+
 const app = express();
 
-app.use(helmet());
+// Serve static uploads
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+
+app.use(helmet({
+  crossOriginResourcePolicy: false, // allow serving static images to frontend
+}));
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:5173',
   credentials: true,
@@ -35,6 +44,8 @@ app.use('/api/v1/workspaces', workspacesRoutes);
 app.use('/api/v1/workspaces/:workspaceId/projects', projectsRoutes);
 app.use('/api/v1/projects/:projectId/tasks', tasksRoutes);
 app.use('/api/v1/tasks/:taskId/comments', commentsRoutes);
+app.use('/api/v1/tasks/:taskId/attachments', attachmentsRoutes);
+app.use('/api/v1/notifications', notificationsRoutes);
 // Central error handler
 app.use(errorHandler);
 

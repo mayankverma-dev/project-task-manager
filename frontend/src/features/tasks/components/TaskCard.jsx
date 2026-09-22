@@ -49,7 +49,7 @@ export const TaskCard = ({ task, index, onClick }) => {
               </div>
               <div className="flex items-center text-[11px]">
                 <Paperclip className="w-3.5 h-3.5 mr-1" />
-                <span>0</span>
+                <span>{task.attachmentCount || 0}</span>
               </div>
             </div>
           </div>

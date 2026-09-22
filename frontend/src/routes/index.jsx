@@ -14,6 +14,7 @@ import { queryClient } from '../app/queryClient.js';
 import { WorkspaceSwitcher } from '../features/workspaces/components/WorkspaceSwitcher.jsx';
 import { ProjectList } from '../features/projects/components/ProjectList.jsx';
 import { PageLoadingSkeleton } from '../components/PageLoadingSkeleton.jsx';
+import { Topbar } from '../components/Topbar.jsx';
 
 const LoginForm = lazy(() => import('../features/auth/components/LoginForm.jsx').then(m => ({ default: m.LoginForm })));
 const RegisterForm = lazy(() => import('../features/auth/components/RegisterForm.jsx').then(m => ({ default: m.RegisterForm })));
@@ -123,7 +124,8 @@ const AuthenticatedApp = () => {
           </button>
         </div>
       </aside>
-      <main className="flex-1 overflow-auto bg-gray-100 relative">
+      <main className="flex-1 overflow-auto bg-gray-100 dark:bg-neutral-900 relative">
+        <Topbar />
         <Outlet />
       </main>
     </div>

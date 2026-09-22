@@ -2,10 +2,13 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { X, Send, Trash2 } from 'lucide-react';
+import { X, Send, Trash2, Paperclip, Download, UploadCloud } from 'lucide-react';
 import { useComments, useCreateComment, useDeleteComment } from '../hooks/useComments';
+import { useAttachments, useUploadAttachment, useDeleteAttachment } from '../hooks/useAttachments';
 import { useSelector } from 'react-redux';
+import { toast } from 'sonner';
 import { CommentSkeleton } from './CommentSkeleton.jsx';
+import { AttachmentSkeleton } from './AttachmentSkeleton.jsx';
 
 const commentSchema = z.object({
   body: z.string().min(1, 'Comment cannot be empty').max(5000),
@@ -25,6 +28,10 @@ export const TaskDetailsModal = ({ task, isOpen, onClose }) => {
   const { mutate: createComment, isPending: isCreating } = useCreateComment(task?.id);
   const { mutate: deleteComment } = useDeleteComment(task?.id);
 
+  const { data: attachmentsData, isLoading: isLoadingAttachments } = useAttachments(isOpen ? task?.id : null);
+  const { mutate: uploadAttachment, isPending: isUploading } = useUploadAttachment(task?.id);
+  const { mutate: deleteAttachment } = useDeleteAttachment(task?.id);
+
   const { register, handleSubmit, reset } = useForm({
     resolver: zodResolver(commentSchema),
     defaultValues: { body: '' },
@@ -41,6 +48,18 @@ export const TaskDetailsModal = ({ task, isOpen, onClose }) => {
   };
 
   const comments = commentsData?.pages.flatMap(page => page.data) || [];
+  const attachments = attachmentsData?.data || [];
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 50 * 1024 * 1024) {
+        toast.error('File size exceeds 50MB limit');
+        return;
+      }
+      uploadAttachment(file);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -79,6 +98,64 @@ export const TaskDetailsModal = ({ task, isOpen, onClose }) => {
             <p className="text-sm text-neutral-800 dark:text-neutral-200 whitespace-pre-wrap">
               {task.description || 'No description provided.'}
             </p>
+          </div>
+
+          <div>
+            <h3 className="text-sm font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-4">Attachments</h3>
+            
+            <div className="mb-4 relative border-2 border-dashed border-gray-300 dark:border-neutral-700 rounded-lg p-6 flex flex-col items-center justify-center hover:bg-gray-50 dark:hover:bg-neutral-800/50 transition-colors">
+              <input 
+                type="file" 
+                onChange={handleFileUpload} 
+                disabled={isUploading}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed" 
+              />
+              <UploadCloud className="w-8 h-8 text-gray-400 mb-2" />
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {isUploading ? 'Uploading...' : 'Click or drag file to this area to upload'}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Max size: 50MB</p>
+            </div>
+
+            {isLoadingAttachments ? (
+              <AttachmentSkeleton />
+            ) : attachments.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                {attachments.map((attachment) => (
+                  <div key={attachment.id} className="flex items-center gap-3 p-3 border rounded-lg dark:border-neutral-800 group">
+                    <div className="flex items-center justify-center w-10 h-10 bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 rounded-md shrink-0">
+                      <Paperclip className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                        {attachment.filename}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate">
+                        {(attachment.size / 1024 / 1024).toFixed(2)} MB • {new Date(attachment.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <a
+                        href={attachment.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-neutral-800 rounded-md"
+                        title="Download/View"
+                      >
+                        <Download className="w-4 h-4" />
+                      </a>
+                      <button
+                        onClick={() => deleteAttachment(attachment.id)}
+                        className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-neutral-800 rounded-md"
+                        title="Delete"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : null}
           </div>
 
           <div>

@@ -88,6 +88,9 @@ per the Definition of Done in `AGENT.md` — not partially.
 
 Phase 11 (Polish) is now complete. Built and wired shimmer skeleton components (`TaskCardSkeleton`, `CommentSkeleton`, `KanbanBoardSkeleton`, `MemberRowSkeleton`, `DashboardStatSkeleton`, `ProjectListSkeleton`) plus a two-pane `PageLoadingSkeleton` route fallback. Converted `WorkspaceDashboard` and `WorkspaceMembers` to `React.lazy()` — the build now emits 7 separate lazy chunks. Added `useThrottle` + `useThrottledCallback` hook from scratch; wired into `KanbanBoard.onDragEnd` at 300ms. Added missing sonner toasts to `useOptimisticTaskUpdate` (success + error), `useCreateComment` (success), and confirmed `AcceptInviteScreen` already covered. Build passes cleanly: 2100 modules, 0 errors.
 
+**Recent Backend Additions:** 
+Fully implemented the previously missing `attachments` and `notifications` backend modules, adding routes, controllers, services, repositories, and Multer-based local storage handling. Fixed a role-checking bug in the comments controller to ensure proper authorization for comment deletion.
+
 —
 
 ## Next Up
@@ -123,7 +126,8 @@ Phase 12 — Tests. Vitest unit tests for services/repositories, Supertest integ
 | 2026-09-16 | useThrottledCallback leading-edge only | For drag-and-drop, leading-edge throttle gives instant feedback on the first drop; subsequent drops within 300ms are dropped. Trailing-edge would delay the visual confirmation unnecessarily. |
 | 2026-09-16 | WorkspaceDashboard + WorkspaceMembers converted to lazy | These were the only two route-level components still eagerly imported. Build now emits 7 separate lazy chunks. WelcomeScreen already lazy from a prior session. |
 | 2026-09-16 | useOptimisticTaskUpdate toast is low-noise | Success toast is brief ("Task updated.") rather than verbose. Drag-and-drop happens frequently; a long toast would be distracting. Error toast is explicit ("Failed to move task — changes rolled back.") so users understand the rollback. |
-
+| 2026-09-22 | Implemented Attachments and Notifications Backend | The DB schema had tables for `attachments`, `notifications`, and `activity_logs`, but no logic existed. Created endpoints, services, repositories, and used `multer` for local file storage in the `uploads/` directory, exposing it statically. |
+| 2026-09-22 | Fixed Comments Deletion Authorization | Standard members couldn't delete comments because `req.user.role` was checked instead of the correct `req.userRole` provided by the RBAC middleware. Corrected the controller logic. |
 ## Known Issues / Notes for Next Session
 
 Ready for Phase 3. Drizzle migrations should be fully tested if not done yet, since Docker is running.

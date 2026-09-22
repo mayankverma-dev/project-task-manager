@@ -44,11 +44,25 @@ export const useRealTimeUpdates = () => {
       }
     };
 
+    const handleAttachmentCreated = ({ attachment }) => {
+      queryClient.invalidateQueries({ queryKey: ['tasks', attachment.taskId, 'attachments'] });
+    };
+
+    const handleAttachmentDeleted = ({ attachmentId, taskId }) => {
+      if (taskId) {
+        queryClient.invalidateQueries({ queryKey: ['tasks', taskId, 'attachments'] });
+      } else {
+        queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      }
+    };
+
     socket.on('task.created', handleTaskCreated);
     socket.on('task.updated', handleTaskUpdated);
     socket.on('task.deleted', handleTaskDeleted);
     socket.on('comment.created', handleCommentCreated);
     socket.on('comment.deleted', handleCommentDeleted);
+    socket.on('attachment.created', handleAttachmentCreated);
+    socket.on('attachment.deleted', handleAttachmentDeleted);
 
     return () => {
       socket.off('task.created', handleTaskCreated);
@@ -56,6 +70,8 @@ export const useRealTimeUpdates = () => {
       socket.off('task.deleted', handleTaskDeleted);
       socket.off('comment.created', handleCommentCreated);
       socket.off('comment.deleted', handleCommentDeleted);
+      socket.off('attachment.created', handleAttachmentCreated);
+      socket.off('attachment.deleted', handleAttachmentDeleted);
     };
   }, [socket, queryClient, activeWorkspace]);
 };
