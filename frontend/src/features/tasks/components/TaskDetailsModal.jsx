@@ -16,7 +16,7 @@ const commentSchema = z.object({
 
 export const TaskDetailsModal = ({ task, isOpen, onClose }) => {
   const user = useSelector((state) => state.auth.user);
-  
+
   const {
     data: commentsData,
     fetchNextPage,
@@ -24,7 +24,7 @@ export const TaskDetailsModal = ({ task, isOpen, onClose }) => {
     isFetchingNextPage,
     isLoading
   } = useComments(isOpen ? task?.id : null);
-  
+
   const { mutate: createComment, isPending: isCreating } = useCreateComment(task?.id);
   const { mutate: deleteComment } = useDeleteComment(task?.id);
 
@@ -71,12 +71,12 @@ export const TaskDetailsModal = ({ task, isOpen, onClose }) => {
               {task.title}
             </h2>
             <div className="flex items-center gap-2 mt-2">
-               <span className={`px-2 py-0.5 text-xs font-semibold uppercase rounded bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400`}>
-                 {task.status.replace('_', ' ')}
-               </span>
-               <span className="px-2 py-0.5 text-xs font-semibold uppercase rounded bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400">
-                 {task.priority}
-               </span>
+              <span className={`px-2 py-0.5 text-xs font-semibold uppercase rounded bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400`}>
+                {task.status.replace('_', ' ')}
+              </span>
+              <span className="px-2 py-0.5 text-xs font-semibold uppercase rounded bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400">
+                {task.priority}
+              </span>
             </div>
           </div>
           <button onClick={onClose} className="p-1 text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded">
@@ -102,19 +102,19 @@ export const TaskDetailsModal = ({ task, isOpen, onClose }) => {
 
           <div>
             <h3 className="text-sm font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-4">Attachments</h3>
-            
-            <div className="mb-4 relative border-2 border-dashed border-gray-300 dark:border-neutral-700 rounded-lg p-6 flex flex-col items-center justify-center hover:bg-gray-50 dark:hover:bg-neutral-800/50 transition-colors">
-              <input 
-                type="file" 
-                onChange={handleFileUpload} 
+
+            <div className="mb-4 relative border border-dashed border-gray-300 dark:border-neutral-700 rounded-md p-3 flex items-center justify-center gap-2 hover:bg-gray-50 dark:hover:bg-neutral-800/50 transition-colors">
+              <input
+                type="file"
+                onChange={handleFileUpload}
                 disabled={isUploading}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed" 
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
               />
-              <UploadCloud className="w-8 h-8 text-gray-400 mb-2" />
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                {isUploading ? 'Uploading...' : 'Click or drag file to this area to upload'}
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Max size: 50MB</p>
+              <UploadCloud className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {isUploading ? 'Uploading...' : 'Upload Attachment'}
+              </span>
+              <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">(Max: 50MB)</span>
             </div>
 
             {isLoadingAttachments ? (
@@ -133,6 +133,11 @@ export const TaskDetailsModal = ({ task, isOpen, onClose }) => {
                       <p className="text-xs text-gray-500 truncate">
                         {(attachment.size / 1024 / 1024).toFixed(2)} MB • {new Date(attachment.createdAt).toLocaleDateString()}
                       </p>
+                      {(attachment.uploadedByName || attachment.uploadedByEmail) && (
+                        <p className="text-xs text-gray-400 truncate mt-0.5">
+                          {attachment.uploadedByName || 'User'} {attachment.uploadedByEmail && `(${attachment.uploadedByEmail})`}
+                        </p>
+                      )}
                     </div>
                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <a
@@ -160,7 +165,7 @@ export const TaskDetailsModal = ({ task, isOpen, onClose }) => {
 
           <div>
             <h3 className="text-sm font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-4">Comments</h3>
-            
+
             {/* Comment Form */}
             <form onSubmit={handleSubmit(onSubmit)} className="mb-6 relative">
               <textarea
@@ -204,10 +209,10 @@ export const TaskDetailsModal = ({ task, isOpen, onClose }) => {
                         <p className="text-sm text-neutral-700 dark:text-neutral-300 whitespace-pre-wrap">
                           {comment.body}
                         </p>
-                        
+
                         {/* Only show delete if not optimistic and user is author (we'd need real user check, simplified here) */}
                         {!comment.isOptimistic && (
-                          <button 
+                          <button
                             onClick={() => deleteComment(comment.id)}
                             className="absolute top-3 right-3 p-1 text-neutral-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
                           >
@@ -217,7 +222,7 @@ export const TaskDetailsModal = ({ task, isOpen, onClose }) => {
                       </div>
                     </div>
                   ))}
-                  
+
                   {hasNextPage && (
                     <button
                       onClick={() => fetchNextPage()}
@@ -233,6 +238,6 @@ export const TaskDetailsModal = ({ task, isOpen, onClose }) => {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 };

@@ -14,6 +14,7 @@ export const attachmentsRepository = {
       .select({
         ...getTableColumns(attachments),
         uploadedByName: users.name,
+        uploadedByEmail: users.email,
       })
       .from(attachments)
       .leftJoin(users, eq(attachments.uploadedBy, users.id))
